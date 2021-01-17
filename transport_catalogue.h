@@ -73,15 +73,19 @@ class transport_catalogue
 {
 public:
     transport_catalogue(){}
-    ~transport_catalogue() {}
-    void addStop(const transport_stop& stop);
-    void addRoute(const bus_route& route);
+    ~transport_catalogue() {} // Clear memory!!!
+    void addStop(transport_stop* stop) {
+        stops_.push_back(stop);
+    }
+    void addRoute(bus_route* route) {
+        routes_.push_back(route);
+    }
     bus_route* route(const std::string_view& name) const;
     transport_stop* stop(const std::string_view& name) const;
     route_info routeInfo(const std::string_view& name) const;
 private:
-    std::deque<transport_stop> stops_;
-    std::deque<bus_route> routes_;
+    std::deque<transport_stop*> stops_;
+    std::deque<bus_route*> routes_;
     std::unordered_map<std::string_view,bus_route*> bus_to_route_;
     std::unordered_map<std::string_view,transport_stop*> stop_to_place_;
 };

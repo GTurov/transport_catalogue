@@ -41,6 +41,7 @@ public:
         for (int i = 0; i < (int)stop_raw_queries.size(); ++i) {
             //std::cout<<stop_raw_queries[i].substr(5)<<std::endl;
             transport_stop * stop = makeStop(stop_raw_queries[i].substr(5));
+            catalogue_.addStop(stop);
             std::cout<<*stop<<std::endl;
         }
         std::cout<<"Routes:"<<std::endl;
