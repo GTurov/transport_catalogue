@@ -1,23 +1,5 @@
 #include "input_reader.h"
 
-
-//std::vector<std::string_view> SplitIntoWords(const std::string_view& text) {
-//    std::vector<std::string_view> words;
-//    int word_begin = 0;
-//    int i = 0;
-//    for (i = 0; i < (int)text.size(); ++i) {
-//        if (text[i] == ' ') {
-//            words.push_back(text.substr(word_begin,i-word_begin));
-//            word_begin = i+1;
-//        }
-//    }
-//    if (word_begin != (int)text.size()) {
-//        words.push_back(text.substr(word_begin,text.size()-word_begin));
-//    }
-//    return words;
-//}
-
-
 std::vector<std::string_view> SplitIntoWords(const std::string_view& text) {
     //std::cout<<"split "<<text<<std::endl;
     const std::string delimetrs = ":,->"s;

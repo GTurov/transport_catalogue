@@ -1,5 +1,6 @@
 #include "transport_catalogue.h"
 
+#include <ostream>
 #include <iomanip>
 
 std::ostream& operator<<(std::ostream& out, const transport_stop& stop) {

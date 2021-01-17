@@ -3,8 +3,6 @@
 #include "geo.h"
 
 #include <deque>
-#include <iomanip>
-#include <ostream>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -76,12 +74,16 @@ public:
     ~transport_catalogue() {} // Clear memory!!!
     void addStop(transport_stop* stop) {
         stops_.push_back(stop);
+        stop_to_place_[stop->name()] = stop;
     }
     void addRoute(bus_route* route) {
         routes_.push_back(route);
+        bus_to_route_[route->name()] = route;
     }
     bus_route* route(const std::string_view& name) const;
-    transport_stop* stop(const std::string_view& name) const;
+    transport_stop* stop(const std::string_view& name) const {
+        return stop_to_place_.at(name);
+    }
     route_info routeInfo(const std::string_view& name) const;
 private:
     std::deque<transport_stop*> stops_;
