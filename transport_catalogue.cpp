@@ -15,7 +15,7 @@ std::ostream& operator<<(std::ostream& out, const bus_route& route) {
     out << "Bus "s << route.name() <<": "s;
     bool firstStop = true;
     for (const transport_stop* stop: route.stops()) {
-        out << (firstStop?" "s:" > "s)<< stop->name();
+        out << (firstStop?""s:" > "s)<< stop->name();
         firstStop = false;
     }
     return out;
