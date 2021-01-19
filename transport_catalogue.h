@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #include <iostream>
@@ -41,6 +42,7 @@ public:
         if (!isCycled()) {
             length_ *= 2;
         }
+        uniqueStopCount_ = std::unordered_set(stops.begin(),stops.end()).size();
     }
 
     std::string_view name() const {
@@ -56,7 +58,8 @@ public:
         return (isCycled_?stops_.size():stops_.size()*2-1);
     }
     int uniqueStopCount() const {
-        return (isCycled_?stops_.size()-1:stops_.size());
+        return uniqueStopCount_;
+        //return (isCycled_?stops_.size()-1:stops_.size());
     }
     double length() const {
         return length_;
@@ -68,15 +71,16 @@ private:
     std::vector<transport_stop*> stops_;
     bool isCycled_ = false;
     double length_ = 0;
+    int uniqueStopCount_ = 0;
 };
 
 std::ostream& operator<<(std::ostream& out, const bus_route& route);
 
 struct route_info {
-    std::string_view name;
-    int stopCount;
-    int uniqueStopCount;
-    double length;
+    std::string_view name = ""s;
+    int stopCount = 0;
+    int uniqueStopCount = 0;
+    double length = 0;
 };
 
 std::ostream& operator<<(std::ostream& out, const route_info& route);
@@ -144,11 +148,11 @@ public:
     }
     route_info routeInfo(const std::string_view& name) const {
         route_info result;
+        result.name = name;
         if (bus_to_route_.find(name) == bus_to_route_.end()) {
-            throw std::out_of_range("Route not found"s);
+            return result;
         };
         bus_route * route = bus_to_route_.at(name);
-        result.name = route->name();
         result.stopCount = route->stopsCount();
         result.uniqueStopCount = route->uniqueStopCount();
         result.length = route->length();
