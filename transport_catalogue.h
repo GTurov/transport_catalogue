@@ -108,6 +108,14 @@ size_t operator() (const std::string_view& text) const {
     }
 };
 
+struct StringHasher {
+size_t operator() (const std::string_view& text) const {
+        //return hasher(std::string(text));
+        return hasher(text);
+    }
+std::hash<std::string_view> hasher;
+};
+
 class transport_catalogue
 {
 public:
@@ -163,5 +171,9 @@ private:
     std::deque<bus_route*> routes_;
     std::unordered_map<std::string_view, bus_route*, NumberHasher> bus_to_route_;
     std::unordered_map<std::string_view, transport_stop*, StopHasher> stop_to_place_;
+//    std::unordered_map<std::string_view, bus_route*, StringHasher> bus_to_route_;
+//    std::unordered_map<std::string_view, transport_stop*, StringHasher> stop_to_place_;
+//    std::unordered_map<std::string_view, bus_route*> bus_to_route_;
+//    std::unordered_map<std::string_view, transport_stop*> stop_to_place_;
 };
 
