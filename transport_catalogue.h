@@ -81,6 +81,29 @@ struct route_info {
 
 std::ostream& operator<<(std::ostream& out, const route_info& route);
 
+struct NumberHasher {
+size_t operator() (const std::string_view& text) const {
+        size_t res = 0;
+        for (int i = 0; i < (int)text.size(); ++i) {
+            res += text[i]-'A';
+            res *= 100;
+        }
+        return res;
+    }
+};
+
+struct StopHasher {
+size_t operator() (const std::string_view& text) const {
+        size_t res = 0;
+        for (int i = 0; i < (text.size() > 4?4:(int)text.size()); ++i) {
+            res += text[i]-'A';
+            res *= 100;
+        }
+        res *= text.size();
+        return res;
+    }
+};
+
 class transport_catalogue
 {
 public:
@@ -88,14 +111,14 @@ public:
     ~transport_catalogue() {
         bus_to_route_.clear();
         stop_to_place_.clear();
-        for (auto stop: stops_) {
-            delete stop;
+        while (!routes_.empty()) {
+            delete routes_.back();
+            routes_.pop_back();
         }
-        stops_.clear();
-        for (auto route: routes_) {
-            delete route;
+        while (!stops_.empty()) {
+            delete stops_.back();
+            stops_.pop_back();
         }
-        routes_.clear();
     }
     void addStop(transport_stop* stop) {
         stops_.push_back(stop);
@@ -121,7 +144,7 @@ public:
     }
     route_info routeInfo(const std::string_view& name) const {
         route_info result;
-        if ( bus_to_route_.find(name)==bus_to_route_.end()) {
+        if (bus_to_route_.find(name) == bus_to_route_.end()) {
             throw std::out_of_range("Route not found"s);
         };
         bus_route * route = bus_to_route_.at(name);
@@ -132,9 +155,9 @@ public:
         return result;
     }
 private:
-    std::vector<transport_stop*> stops_;
-    std::vector<bus_route*> routes_;
-    std::unordered_map<std::string_view,bus_route*> bus_to_route_;
-    std::unordered_map<std::string_view,transport_stop*> stop_to_place_;
+    std::deque<transport_stop*> stops_;
+    std::deque<bus_route*> routes_;
+    std::unordered_map<std::string_view, bus_route*, NumberHasher> bus_to_route_;
+    std::unordered_map<std::string_view, transport_stop*, StopHasher> stop_to_place_;
 };
 
