@@ -32,9 +32,9 @@ std::ostream& operator<<(std::ostream& out, const transport_stop& stop);
 
 class bus_route {
 public:
-    bus_route(std::string_view name, std::vector<transport_stop*> stops)
-        :name_(name), stops_(stops) {
-        isCycled_ = (stops_[0]->name() == stops_[stops_.size()-1]->name());
+    bus_route(std::string_view name, std::vector<transport_stop*> stops, bool cycled = false)
+        :name_(name), stops_(stops), isCycled_(cycled) {
+        //isCycled_ = (stops_[0]->name() == stops_[stops_.size()-1]->name());
         length_ = 0;
         for (int i = 0; i < (int)stops.size()-1; ++i) {
             length_ += ComputeDistance(stops[i]->place(),stops[i+1]->place());
@@ -42,7 +42,10 @@ public:
         if (!isCycled()) {
             length_ *= 2;
         }
-        uniqueStopCount_ = std::unordered_set(stops.begin(),stops.end()).size();
+//        std::unordered_set<transport_stop*> uniqueStops(stops.begin(), stops.end());
+//        uniqueStopCount_ = uniqueStops.size();
+
+        uniqueStopCount_ = std::unordered_set<transport_stop*>(stops.begin(), stops.end()).size();
     }
 
     std::string_view name() const {
@@ -145,8 +148,8 @@ public:
         routes_.push_back(route);
         bus_to_route_[route->name()] = route;
     }
-    void addRoute(std::string_view name, std::vector<transport_stop*> stops) {
-        auto* route = new bus_route(name, stops);
+    void addRoute(std::string_view name, std::vector<transport_stop*> stops, bool cycled = false) {
+        auto* route = new bus_route(name, stops, cycled);
         //std::cout<<*route<<std::endl;
         addRoute(route);
     }

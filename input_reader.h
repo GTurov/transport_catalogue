@@ -2,7 +2,7 @@
 
 #include "transport_catalogue.h"
 
-#include <charconv>
+//#include <charconv>
 #include <iostream>
 #include <stdexcept>
 #include <string>
@@ -159,12 +159,17 @@ public:
             size_t word_begin = doubledotPos+1;
             size_t word_end = doubledotPos+1;
             std::vector<transport_stop*> stops;
+            bool isCycled = false;
             while(word_begin != std::string::npos ) {
                 word_begin = route_raw_queries[i].find_first_not_of(delimetrs, word_end);
                 if (word_begin == std::string::npos) {
                     break;
                 }
                 word_end = route_raw_queries[i].find_first_of(delimetrs,word_begin);
+                if (word_end != std::string::npos) {
+                    isCycled = (route_raw_queries[i][word_end] == '>')&&(word_end != std::string::npos);
+                }
+                //std::cout<<isCycled;
                 std::string_view stopName =
                         route_raw_queries[i].substr(word_begin+1,word_end-word_begin
                                                     - (word_end==std::string::npos?1:2));
@@ -174,7 +179,8 @@ public:
                 stops.push_back(catalogue_.stop(stopName));
 
             }
-            catalogue_.addRoute(busName, std::move(stops));
+            catalogue_.addRoute(busName, std::move(stops), isCycled);
+            //std::cout<<std::endl;
         }
     }
 
