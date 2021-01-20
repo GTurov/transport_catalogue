@@ -199,11 +199,22 @@ public:
             size_t first_space = sv.find(' ');
             std::string_view command = sv.substr(0,first_space);
 
-            if(command == "Bus"sv) {
+            if (command == "Bus"sv) {
                 std::string_view busName = sv.substr(first_space+1);
                 //std::cout<<"|"s<<busName<<"|"s<<std::endl;
                 route_info info = catalogue_.routeInfo(busName);
                 std::cout<<info<<std::endl;
+            }
+            if (command == "Stop"sv) {
+                std::string_view stopName = sv.substr(first_space+1);
+                //std::cout<<"|"s<<stopName<<"|"s<<std::endl;
+                try {
+                    stop_info info = catalogue_.stopInfo(stopName);
+                    std::cout<<info<<std::endl;
+
+                }  catch (const std::out_of_range& e) {
+                    std::cout<<"Stop "s<<stopName<<": not found"s<<std::endl;
+                }
             }
         }
     }

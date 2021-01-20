@@ -10,6 +10,10 @@ std::ostream& operator<<(std::ostream& out, const transport_stop& stop) {
     return out;
 }
 
+bool operator<(const transport_stop& lhs, const transport_stop& rhs) {
+    return std::lexicographical_compare(lhs.name().begin(), lhs.name().end(),
+                                        rhs.name().begin(), rhs.name().end());
+}
 
 std::ostream& operator<<(std::ostream& out, const bus_route& route) {
     out << "Bus "s << route.name() <<": "s;
@@ -21,6 +25,11 @@ std::ostream& operator<<(std::ostream& out, const bus_route& route) {
     return out;
 }
 
+bool operator<(const bus_route& lhs, const bus_route& rhs) {
+    return std::lexicographical_compare(lhs.name().begin(), lhs.name().end(),
+                                        rhs.name().begin(), rhs.name().end());
+}
+
 std::ostream& operator<<(std::ostream& out, const route_info& route) {
     out << "Bus "s << route.name <<": "s;
     if (route.stopCount != 0) {
@@ -30,6 +39,19 @@ std::ostream& operator<<(std::ostream& out, const route_info& route) {
         out << route.length << " route length"s;
     } else {
         out << "not found"s;
+    }
+    return out;
+}
+
+std::ostream& operator<<(std::ostream& out, const stop_info& stop) {
+    out << "Stop "s << stop.name <<":"s;
+    if (stop.routes.size() == 0) {
+        out<< " no buses";
+    } else {
+        out<< " buses";
+        for (const bus_route* route: stop.routes) {
+            out << " "s << route->name();
+        }
     }
     return out;
 }
