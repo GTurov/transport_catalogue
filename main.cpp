@@ -23,7 +23,7 @@ int main()
     input_reader reader(catalogue);
 
     stringstream  inputData;
-    inputData << "13"s << endl
+    inputData << "18"s << endl
               << "Stop Tolstopaltsevo: 55.611087, 37.208290"s << endl
               << "Stop Marushkino: 55.595884, 37.209755"s << endl
               << "Bus 256: Biryulyovo Zapadnoye > Biryusinka > Universam > Biryulyovo Tovarnaya > Biryulyovo Passazhirskaya > Biryulyovo Zapadnoye"s << endl
@@ -36,7 +36,13 @@ int main()
               << "Stop Biryulyovo Passazhirskaya: 55.580999, 37.659164"s << endl
               << "Bus 828: Biryulyovo Zapadnoye > Universam > Rossoshanskaya ulitsa > Biryulyovo Zapadnoye"s << endl
               << "Stop Rossoshanskaya ulitsa: 55.595579, 37.605757"s << endl
-              << "Stop Prazhskaya: 55.611678, 37.603831"s << endl;
+              << "Stop Prazhskaya: 55.611678, 37.603831"s << endl
+              << "Bus 100500: Biryulyovo Zapadnoye > Universam > Rossoshanskaya ulitsa > Biryulyovo Zapadnoye"s << endl
+              << "Bus 921a: Biryulyovo Zapadnoye > Universam > Rossoshanskaya ulitsa > Biryulyovo Zapadnoye"s << endl
+              << "Bus 828a: Biryulyovo Zapadnoye > Universam > Rossoshanskaya ulitsa > Biryulyovo Zapadnoye"s << endl
+              << "Bus A: Biryulyovo Zapadnoye > Universam > Rossoshanskaya ulitsa > Biryulyovo Zapadnoye"s << endl
+              << "Bus b: Biryulyovo Zapadnoye > Universam > Rossoshanskaya ulitsa > Biryulyovo Zapadnoye"s << endl
+                 ;
     stringstream  queryData;
     queryData << "6"s << endl
               << "Bus 256"s << endl

@@ -10,7 +10,7 @@
 #include <unordered_set>
 #include <vector>
 
-#include <iostream>
+#include <iostream> //debug
 
 using namespace std::literals;
 
@@ -21,7 +21,7 @@ public:
     const Coordinates place() const {
         return place_;
     }
-    const std::string_view name() const {
+    const std::string& name() const {
         return name_;
     }
 private:
@@ -37,7 +37,6 @@ class bus_route {
 public:
     bus_route(std::string_view name, std::vector<transport_stop*> stops, bool cycled = false)
         :name_(name), stops_(stops), isCycled_(cycled) {
-        //isCycled_ = (stops_[0]->name() == stops_[stops_.size()-1]->name());
         length_ = 0;
         for (int i = 0; i < (int)stops.size()-1; ++i) {
             length_ += ComputeDistance(stops[i]->place(),stops[i+1]->place());
@@ -45,13 +44,10 @@ public:
         if (!isCycled()) {
             length_ *= 2;
         }
-//        std::unordered_set<transport_stop*> uniqueStops(stops.begin(), stops.end());
-//        uniqueStopCount_ = uniqueStops.size();
-
         uniqueStopCount_ = std::unordered_set<transport_stop*>(stops.begin(), stops.end()).size();
     }
 
-    std::string_view name() const {
+    const std::string& name() const {
         return name_;
     }
     const std::vector<transport_stop*> stops() const {
@@ -65,7 +61,6 @@ public:
     }
     int uniqueStopCount() const {
         return uniqueStopCount_;
-        //return (isCycled_?stops_.size()-1:stops_.size());
     }
     double length() const {
         return length_;
@@ -83,6 +78,16 @@ std::ostream& operator<<(std::ostream& out, const bus_route& route);
 
 bool operator<(const bus_route& lhs, const bus_route& rhs);
 
+struct busRouteComparator
+{
+    bool operator() (const bus_route* lhs, const bus_route* rhs) const
+    {
+        return *lhs < *rhs;
+    }
+};
+
+using route_set = std::set<bus_route*,busRouteComparator>;
+
 struct route_info {
     std::string_view name = ""s;
     int stopCount = 0;
@@ -94,7 +99,7 @@ std::ostream& operator<<(std::ostream& out, const route_info& route);
 
 struct stop_info {
     std::string_view name = ""s;
-    std::set<bus_route*> routes;
+    route_set routes;
 };
 
 std::ostream& operator<<(std::ostream& out, const stop_info& stop);
@@ -135,8 +140,8 @@ class transport_catalogue
 public:
     transport_catalogue(){}
     ~transport_catalogue() {
-        bus_to_route_.clear();
-        stop_to_place_.clear();
+        name_to_bus_.clear();
+        name_to_stop_.clear();
         stop_to_buses_.clear();
         while (!routes_.empty()) {
             delete routes_.back();
@@ -149,9 +154,9 @@ public:
     }
     void addStop(transport_stop* stop) {
         stops_.push_back(stop);
-        stop_to_place_[stop->name()] = stop;
-        if (stop_to_buses_.find(stop->name()) == stop_to_buses_.end()) {
-            stop_to_buses_[stop->name()] = {};
+        name_to_stop_[stop->name()] = stop;
+        if (stop_to_buses_.find(stop) == stop_to_buses_.end()) {
+            stop_to_buses_[stop] = {};
         }
     }
     void addStop(std::string_view name, Coordinates place) {
@@ -161,10 +166,10 @@ public:
     }
     void addRoute(bus_route* route) {
         routes_.push_back(route);
-        bus_to_route_[route->name()] = route;
+        name_to_bus_[route->name()] = route;
         for (auto * stop: route->stops()) {
             //std::cout<<stop->name()<<"|"s;
-            stop_to_buses_[stop->name()].insert(route);
+            stop_to_buses_[stop].insert(route);
         }
     }
     void addRoute(std::string_view name, std::vector<transport_stop*> stops, bool cycled = false) {
@@ -172,21 +177,25 @@ public:
         //std::cout<<*route<<std::endl;
         addRoute(route);
     }
-    bus_route* route(const std::string_view& name) const;
+    bus_route* route(const std::string_view& name) const {
+        return name_to_bus_.at(name);
+    }
     transport_stop* stop(const std::string_view& name) const {
-        return stop_to_place_.at(name);
+        return name_to_stop_.at(name);
     }
-    std::set<bus_route*> stopToBuses(const std::string_view& name) const {
-        return stop_to_buses_.at(name);
+   route_set stopToBuses(const std::string_view& name) const {
+        return stop_to_buses_.at(name_to_stop_.at(name));
     }
-
+    route_set stopToBuses(transport_stop* stop) const {
+        return stop_to_buses_.at(stop);
+    }
     route_info routeInfo(const std::string_view& name) const {
         route_info result;
         result.name = name;
-        if (bus_to_route_.find(name) == bus_to_route_.end()) {
+        if (name_to_bus_.find(name) == name_to_bus_.end()) {
             return result;
         };
-        bus_route * route = bus_to_route_.at(name);
+        bus_route * route = name_to_bus_.at(name);
         result.stopCount = route->stopsCount();
         result.uniqueStopCount = route->uniqueStopCount();
         result.length = route->length();
@@ -195,21 +204,17 @@ public:
     stop_info stopInfo(const std::string_view& name) const {
         stop_info result;
         result.name = name;
-        if (stop_to_buses_.find(name) == stop_to_buses_.end()) {
+        if (stop_to_buses_.find(name_to_stop_.at(name)) == stop_to_buses_.end()) {
             throw std::out_of_range("Stop not found");
         };
-        result.routes = stop_to_buses_.at(name);
+        result.routes = stop_to_buses_.at(name_to_stop_.at(name));
         return result;
     }
 private:
     std::deque<transport_stop*> stops_;
     std::deque<bus_route*> routes_;
-    std::unordered_map<std::string_view, bus_route*, NumberHasher> bus_to_route_;
-    std::unordered_map<std::string_view, transport_stop*, StopHasher> stop_to_place_;
-    std::unordered_map<std::string_view, std::set<bus_route*>, StopHasher> stop_to_buses_;
-//    std::unordered_map<std::string_view, bus_route*, StringHasher> bus_to_route_;
-//    std::unordered_map<std::string_view, transport_stop*, StringHasher> stop_to_place_;
-//    std::unordered_map<std::string_view, bus_route*> bus_to_route_;
-//    std::unordered_map<std::string_view, transport_stop*> stop_to_place_;
+    std::unordered_map<std::string_view, bus_route*, NumberHasher> name_to_bus_;
+    std::unordered_map<std::string_view, transport_stop*, StopHasher> name_to_stop_;
+    std::unordered_map<transport_stop*, route_set> stop_to_buses_;
 };
 
