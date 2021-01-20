@@ -26,6 +26,7 @@ std::ostream& operator<<(std::ostream& out, const route_info& route) {
     if (route.stopCount != 0) {
         out << route.stopCount << " stops on route, "s;
         out << route.uniqueStopCount << " unique stops, "s;
+        out << std::setprecision(6);
         out << route.length << " route length"s;
     } else {
         out << "not found"s;
