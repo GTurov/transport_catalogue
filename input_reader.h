@@ -6,15 +6,16 @@
 #include <stdexcept>
 #include <string>
 
+namespace transport {
 
-std::vector<std::string_view> splitIntoWords(const std::string_view& text);
-
+namespace detail {
 std::vector<std::string_view> split(const std::string_view& text, char delimeter = ' ');
+}
 
 class input_reader
 {
 public:
-    input_reader(transport_catalogue& catalogue)
+    input_reader(Catalogue& catalogue)
         :catalogue_(catalogue) {}
     void fillDatabase(std::istream& input);
     void readQueries(std::istream& input);
@@ -28,5 +29,7 @@ private:
     distance ParseDistance(std::string_view stopName, std::string_view distanceData);
 
 private:
-    transport_catalogue& catalogue_;
+    Catalogue& catalogue_;
 };
+
+}

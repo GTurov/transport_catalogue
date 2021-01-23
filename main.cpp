@@ -6,10 +6,11 @@
 #include <iomanip> // Why???
 
 using namespace std;
+using namespace transport;
 
 int main()
 {
-    transport_catalogue catalogue;
+    Catalogue catalogue;
     input_reader reader(catalogue);
 
     stringstream  inputData;
