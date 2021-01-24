@@ -8,14 +8,7 @@
 
 namespace transport {
 
-std::ostream& operator<<(std::ostream& out, const Stop& stop) {
-    out << "Stop "s << stop.name() <<": "s;
-    out << std::setprecision(6);
-    out << stop.place().lat << " "s << stop.place().lng;
-    return out;
-}
-
-Route::Route(std::string_view name, std::vector<Stop*> stops, bool cycled)
+Route::Route(const std::string_view name, const std::vector<Stop *> &stops, bool cycled)
     :name_(name), stops_(stops), isCycled_(cycled) {
     for (int i = 0; i < (int)stops.size()-1; ++i) {
         directLength_ += ComputeDistance(stops[i]->place(),stops[i+1]->place());
@@ -36,36 +29,6 @@ std::ostream& operator<<(std::ostream& out, const Route& route) {
     return out;
 }
 
-bool detail::RouteComparator::operator() (const Route* lhs, const Route* rhs) const {
-    return std::lexicographical_compare(
-                lhs->name().begin(), lhs->name().end(),
-                rhs->name().begin(), rhs->name().end());
-}
-
-size_t detail::RouteNumberHasher::operator() (const std::string_view& text) const {
-    size_t res = 0;
-    for (int i = 0; i < (int)text.size(); ++i) {
-        res += text[i]-'A';
-        res *= 100;
-    }
-    return res;
-}
-
-size_t detail::StopNameHasher::operator() (const std::string_view& text) const {
-    size_t res = 0;
-    for (int i = 0; i < (text.size() > 4?4:(int)text.size()); ++i) {
-        res += text[i]-'A';
-        res *= 100;
-    }
-    res *= text.size();
-    return res;
-}
-
-size_t detail::StopPairHasher::operator() (const std::pair<Stop*,Stop*>& stops) const {
-    // Будем считать, что для x64 вероятность совпадения "хвостов" адресов невелика :)
-    return ((((size_t)stops.first<<16)&0xFFFF0000) | ((size_t)stops.second&0x0000FFFF));
-}
-
 std::ostream& operator<<(std::ostream& out, const Route::Info& route) {
     out << "Bus "s << route.name <<": "s;
     if (route.stopCount != 0) {
@@ -80,6 +43,28 @@ std::ostream& operator<<(std::ostream& out, const Route::Info& route) {
     return out;
 }
 
+bool detail::RouteComparator::operator() (const Route* lhs, const Route* rhs) const {
+    return std::lexicographical_compare(
+                lhs->name().begin(), lhs->name().end(),
+                rhs->name().begin(), rhs->name().end());
+}
+
+size_t detail::RouteNumberHasher::operator() (const std::string_view text) const {
+    size_t res = 0;
+    for (int i = 0; i < (int)text.size(); ++i) {
+        res += text[i]-'A';
+        res *= 100;
+    }
+    return res;
+}
+
+std::ostream& operator<<(std::ostream& out, const Stop& stop) {
+    out << "Stop "s << stop.name() <<": "s;
+    out << std::setprecision(6);
+    out << stop.place().lat << " "s << stop.place().lng;
+    return out;
+}
+
 std::ostream& operator<<(std::ostream& out, const Stop::Info& stop) {
     out << "Stop "s << stop.name <<":"s;
     if (stop.routes.size() == 0) {
@@ -91,6 +76,21 @@ std::ostream& operator<<(std::ostream& out, const Stop::Info& stop) {
         }
     }
     return out;
+}
+
+size_t detail::StopNameHasher::operator() (const std::string_view text) const {
+    size_t res = 0;
+    for (int i = 0; i < (text.size() > 4?4:(int)text.size()); ++i) {
+        res += text[i]-'A';
+        res *= 100;
+    }
+    res *= text.size();
+    return res;
+}
+
+size_t detail::StopPairHasher::operator() (const std::pair<Stop*,Stop*> stops) const {
+    // Будем считать, что для x64 вероятность совпадения "хвостов" адресов невелика :)
+    return ((((size_t)stops.first<<16)&0xFFFF0000) | ((size_t)stops.second&0x0000FFFF));
 }
 
 Catalogue::~Catalogue() {
@@ -116,7 +116,7 @@ void Catalogue::addStop(Stop* stop) {
     }
 }
 
-void Catalogue::addStop(std::string_view name, Coordinates place) {
+void Catalogue::addStop(const std::string_view name, Coordinates place) {
     auto* stop = new Stop(name, place);
     //std::cout<<*stop<<std::endl; // debug
     addStop(stop);
@@ -141,7 +141,7 @@ void Catalogue::addRoute(Route* route) {
         stop_to_buses_[stop].insert(route);
     }
 }
-void Catalogue::addRoute(std::string_view name, std::vector<Stop*> stops, bool cycled) {
+void Catalogue::addRoute(const std::string_view name, std::vector<Stop*> stops, bool cycled) {
     auto* route = new Route(name, stops, cycled);
     //std::cout<<*route<<std::endl; // debug
     addRoute(route);
@@ -155,14 +155,14 @@ void Catalogue::setDistance(Stop* first, Stop* second, int meters) {
     }
 }
 
-void Catalogue::setDistance(const std::string_view& first, const std::string_view& second, int meters) {
+void Catalogue::setDistance(const std::string_view first, const std::string_view second, int meters) {
     if ((name_to_stop_.find(first) == name_to_stop_.end()) || (name_to_stop_.find(second) == name_to_stop_.end())) {
         throw std::invalid_argument("Invalid stop"s);
     }
     setDistance(name_to_stop_[first], name_to_stop_[second], meters);
 }
 
-Route::Info Catalogue::routeInfo(const std::string_view& name) const {
+const Route::Info Catalogue::routeInfo(const std::string_view name) const {
     Route::Info result;
     result.name = name;
     if (name_to_bus_.find(name) == name_to_bus_.end()) {
@@ -176,7 +176,7 @@ Route::Info Catalogue::routeInfo(const std::string_view& name) const {
     return result;
 }
 
-Stop::Info Catalogue::stopInfo(const std::string_view& name) const {
+const Stop::Info Catalogue::stopInfo(const std::string_view name) const {
     Stop::Info result;
     result.name = name;
     if (stop_to_buses_.find(name_to_stop_.at(name)) == stop_to_buses_.end()) {
@@ -201,7 +201,7 @@ int Catalogue::distanceBetween(Stop* first, Stop* second) const {
         throw std::invalid_argument("Invalid stop"s);
     }
 }
-int Catalogue::distanceBetween(const std::string_view& first, const std::string_view& second) const {
+int Catalogue::distanceBetween(const std::string_view first, const std::string_view second) const {
     if ((name_to_stop_.find(first) == name_to_stop_.end()) || (name_to_stop_.find(second) == name_to_stop_.end())) {
         throw std::invalid_argument("Invalid stop"s);
     }

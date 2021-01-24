@@ -9,7 +9,7 @@
 namespace transport {
 
 namespace detail {
-std::vector<std::string_view> split(const std::string_view& text, char delimeter = ' ');
+std::vector<std::string_view> split(const std::string_view text, char delimeter = ' ');
 }
 
 class input_reader
@@ -26,7 +26,7 @@ private:
         std::string_view to;
         int meters;
     };
-    distance ParseDistance(std::string_view stopName, std::string_view distanceData);
+    distance ParseDistance(const std::string_view stopName, const std::string_view distanceData);
 
 private:
     Catalogue& catalogue_;

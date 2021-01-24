@@ -74,22 +74,23 @@ int main()
     //reader.readQueries(cin);
     //reader.readQueries(queryData);
     reader.readQueries(input);
-//        cout<<"-------------"s<<endl;
-//        catalogue.printDistances();
-//        cout<<catalogue.distanceBetween("Tolstopaltsevo"s,"Marushkino"s)<<std::endl;
-//        cout<<catalogue.distanceBetween("Marushkino"s,"Tolstopaltsevo"s)<<std::endl;
-//        cout<<catalogue.distanceBetween("Marushkino"s,"Marushkino"s)<<std::endl;
-//        cout<<catalogue.distanceBetween("Rossoshanskaya ulitsa"s,"Biryulyovo Zapadnoye"s)<<std::endl;
-//        cout<<catalogue.distanceBetween("Biryulyovo Zapadnoye"s, "Rossoshanskaya ulitsa"s)<<std::endl;
-    //    cout<<catalogue.routeInfo("256"s)<<endl;
-    //    cout<<catalogue.routeInfo("750"s)<<endl;
-    //    try {
-    //        auto r = catalogue.routeInfo("751"s);
-    //        cout<<r<<endl;
-    //    }  catch (exception e) {
-    //        cout<<"not found"<<endl;
-    //    }
-    //    cout<<catalogue.routeInfo("751"s)<<endl;
+
+//    cout<<"-------------"s<<endl;
+//    catalogue.printDistances();
+//    cout<<catalogue.distanceBetween("Tolstopaltsevo"s,"Marushkino"s)<<std::endl;
+//    cout<<catalogue.distanceBetween("Marushkino"s,"Tolstopaltsevo"s)<<std::endl;
+//    cout<<catalogue.distanceBetween("Marushkino"s,"Marushkino"s)<<std::endl;
+//    cout<<catalogue.distanceBetween("Rossoshanskaya ulitsa"s,"Biryulyovo Zapadnoye"s)<<std::endl;
+//    cout<<catalogue.distanceBetween("Biryulyovo Zapadnoye"s, "Rossoshanskaya ulitsa"s)<<std::endl;
+//    cout<<catalogue.routeInfo("256"s)<<endl;
+//    cout<<catalogue.routeInfo("750"s)<<endl;
+//    try {
+//        auto r = catalogue.routeInfo("751"s);
+//        cout<<r<<endl;
+//    }  catch (exception e) {
+//        cout<<"not found"<<endl;
+//    }
+//    cout<<catalogue.routeInfo("751"s)<<endl;
 
 
     return 0;

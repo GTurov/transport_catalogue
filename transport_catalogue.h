@@ -17,7 +17,7 @@ class Stop;
 
 class Route {
 public:
-    Route(std::string_view name, std::vector<Stop*> stops,
+    Route(const std::string_view name, const std::vector<Stop*>& stops,
               bool cycled = false);
     void setLength(int meters) {
         length_ = meters;
@@ -60,15 +60,7 @@ struct RouteComparator {
 };
 
 struct RouteNumberHasher {
-    size_t operator() (const std::string_view& text) const;
-};
-
-struct StopNameHasher {
-    size_t operator() (const std::string_view& text) const;
-};
-
-struct StopPairHasher {
-    size_t operator() (const std::pair<Stop*,Stop*>& stops) const;
+    size_t operator() (const std::string_view text) const;
 };
 
 }
@@ -77,7 +69,7 @@ using RouteSet = std::set<Route*, detail::RouteComparator>;
 
 class Stop {
 public:
-    Stop(std::string_view name, Coordinates place)
+    Stop(const std::string_view name, const Coordinates place)
         :name_(name), place_(place)  {}
     const Coordinates place() const {return place_;}
     const std::string& name() const {return name_;}
@@ -95,24 +87,36 @@ std::ostream& operator<<(std::ostream& out, const Stop& stop);
 
 std::ostream& operator<<(std::ostream& out, const Stop::Info& stop);
 
+namespace detail {
+
+struct StopNameHasher {
+    size_t operator() (const std::string_view text) const;
+};
+
+struct StopPairHasher {
+    size_t operator() (const std::pair<Stop*,Stop*> stops) const;
+};
+
+}
+
 class Catalogue {
 public:
     Catalogue(){}
     ~Catalogue();
     void addStop(Stop* stop);
-    void addStop(std::string_view name, Coordinates place);
+    void addStop(const std::string_view name, Coordinates place);
     void addRoute(Route* route);
-    void addRoute(std::string_view name, std::vector<Stop*> stops, bool cycled = false);
+    void addRoute(const std::string_view name, std::vector<Stop*> stops, bool cycled = false);
     void setDistance(Stop* first, Stop* second, int meters);
-    void setDistance(const std::string_view& first, const std::string_view& second, int meters);
-    Route* route(const std::string_view& name) const {return name_to_bus_.at(name);}
-    Stop* stop(const std::string_view& name) const {return name_to_stop_.at(name);}
-    RouteSet stopToBuses(const std::string_view& name) const {return stop_to_buses_.at(name_to_stop_.at(name));}
-    RouteSet stopToBuses(Stop* stop) const {return stop_to_buses_.at(stop);}
-    Route::Info routeInfo(const std::string_view& name) const;
-    Stop::Info stopInfo(const std::string_view& name) const;
+    void setDistance(const std::string_view first, const std::string_view second, int meters);
+    Route* route(const std::string_view name) const {return name_to_bus_.at(name);}
+    Stop* stop(const std::string_view name) const {return name_to_stop_.at(name);}
+    const RouteSet routesViaStop(const std::string_view name) const {return stop_to_buses_.at(name_to_stop_.at(name));}
+    const RouteSet routesViaStop(Stop* stop) const {return stop_to_buses_.at(stop);}
+    const Route::Info routeInfo(const std::string_view name) const;
+    const Stop::Info stopInfo(const std::string_view name) const;
     int distanceBetween(Stop* first, Stop* second) const;
-    int distanceBetween(const std::string_view& first, const std::string_view& second) const;
+    int distanceBetween(const std::string_view first, const std::string_view second) const;
 
 private:
     std::deque<Stop*> stops_;

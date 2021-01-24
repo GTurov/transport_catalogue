@@ -2,7 +2,7 @@
 
 namespace transport {
 
-std::vector<std::string_view> detail::split(const std::string_view& text, char delimeter) {
+std::vector<std::string_view> detail::split(const std::string_view text, char delimeter) {
     std::vector<std::string_view> words;
     size_t word_begin = 0;
     size_t word_end = 0;
@@ -130,7 +130,7 @@ void input_reader::readQueries(std::istream& input) {
     }
 }
 
-input_reader::distance input_reader::ParseDistance(std::string_view stopName, std::string_view distanceData) {
+input_reader::distance input_reader::ParseDistance(const std::string_view stopName, const std::string_view distanceData) {
     distance result;
     if (distanceData.empty()) {
         throw std::invalid_argument("Data is empty"s);
