@@ -114,13 +114,13 @@ void input_reader::readQueries(std::istream& input) {
 
         if (command == "Bus"sv) {
             std::string_view busName = sv.substr(first_space+1);
-            RouteInfo info = catalogue_.routeInfo(busName);
+            Route::Info info = catalogue_.routeInfo(busName);
             std::cout<<info<<std::endl;
         }
         if (command == "Stop"sv) {
             std::string_view stopName = sv.substr(first_space+1);
             try {
-                StopInfo info = catalogue_.stopInfo(stopName);
+                Stop::Info info = catalogue_.stopInfo(stopName);
                 std::cout<<info<<std::endl;
 
             }  catch (const std::exception& e) {

@@ -13,19 +13,7 @@ namespace transport {
 
 using namespace std::literals;
 
-class Stop {
-public:
-    Stop(std::string_view name, Coordinates place)
-        :name_(name), place_(place)  {}
-    const Coordinates place() const {return place_;}
-    const std::string& name() const {return name_;}
-
-private:
-    std::string name_;
-    Coordinates place_;
-};
-
-std::ostream& operator<<(std::ostream& out, const Stop& stop);
+class Stop;
 
 class Route {
 public:
@@ -42,6 +30,13 @@ public:
     int uniqueStopCount() const {return uniqueStopCount_;}
     int length() const {return length_;}
     double curvature() const {return curvature_;}
+    struct Info {
+        std::string_view name = ""s;
+        int stopCount = 0;
+        int uniqueStopCount = 0;
+        int length = 0;
+        double curvature = 1.0;
+    };
 
 private:
     std::string name_;
@@ -55,15 +50,8 @@ private:
 
 std::ostream& operator<<(std::ostream& out, const Route& route);
 
-struct RouteInfo {
-    std::string_view name = ""s;
-    int stopCount = 0;
-    int uniqueStopCount = 0;
-    int length = 0;
-    double curvature = 1.0;
-};
+std::ostream& operator<<(std::ostream& out, const Route::Info& route);
 
-std::ostream& operator<<(std::ostream& out, const RouteInfo& route);
 
 namespace detail {
 
@@ -81,19 +69,31 @@ struct StopNameHasher {
 
 struct StopPairHasher {
     size_t operator() (const std::pair<Stop*,Stop*>& stops) const;
-    StopNameHasher hasher;
 };
 
 }
 
 using RouteSet = std::set<Route*, detail::RouteComparator>;
 
-struct StopInfo {
-    std::string_view name = ""s;
-    RouteSet routes;
+class Stop {
+public:
+    Stop(std::string_view name, Coordinates place)
+        :name_(name), place_(place)  {}
+    const Coordinates place() const {return place_;}
+    const std::string& name() const {return name_;}
+    struct Info {
+        std::string_view name = ""s;
+        RouteSet routes;
+    };
+
+private:
+    std::string name_;
+    Coordinates place_;
 };
 
-std::ostream& operator<<(std::ostream& out, const StopInfo& stop);
+std::ostream& operator<<(std::ostream& out, const Stop& stop);
+
+std::ostream& operator<<(std::ostream& out, const Stop::Info& stop);
 
 class Catalogue {
 public:
@@ -109,8 +109,8 @@ public:
     Stop* stop(const std::string_view& name) const {return name_to_stop_.at(name);}
     RouteSet stopToBuses(const std::string_view& name) const {return stop_to_buses_.at(name_to_stop_.at(name));}
     RouteSet stopToBuses(Stop* stop) const {return stop_to_buses_.at(stop);}
-    RouteInfo routeInfo(const std::string_view& name) const;
-    StopInfo stopInfo(const std::string_view& name) const;
+    Route::Info routeInfo(const std::string_view& name) const;
+    Stop::Info stopInfo(const std::string_view& name) const;
     int distanceBetween(Stop* first, Stop* second) const;
     int distanceBetween(const std::string_view& first, const std::string_view& second) const;
 

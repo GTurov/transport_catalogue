@@ -4,6 +4,8 @@
 #include <iomanip>
 #include <stdexcept>
 
+#include <iostream>
+
 namespace transport {
 
 std::ostream& operator<<(std::ostream& out, const Stop& stop) {
@@ -60,11 +62,11 @@ size_t detail::StopNameHasher::operator() (const std::string_view& text) const {
 }
 
 size_t detail::StopPairHasher::operator() (const std::pair<Stop*,Stop*>& stops) const {
-    //TODO Переделать на хэш указателей с битовым сдвигом
-    return hasher(stops.first->name()) + hasher(stops.second->name());
+    // Будем считать, что для x64 вероятность совпадения "хвостов" адресов невелика :)
+    return ((((size_t)stops.first<<16)&0xFFFF0000) | ((size_t)stops.second&0x0000FFFF));
 }
 
-std::ostream& operator<<(std::ostream& out, const RouteInfo& route) {
+std::ostream& operator<<(std::ostream& out, const Route::Info& route) {
     out << "Bus "s << route.name <<": "s;
     if (route.stopCount != 0) {
         out << route.stopCount << " stops on route, "s;
@@ -78,7 +80,7 @@ std::ostream& operator<<(std::ostream& out, const RouteInfo& route) {
     return out;
 }
 
-std::ostream& operator<<(std::ostream& out, const StopInfo& stop) {
+std::ostream& operator<<(std::ostream& out, const Stop::Info& stop) {
     out << "Stop "s << stop.name <<":"s;
     if (stop.routes.size() == 0) {
         out<< " no buses";
@@ -160,8 +162,8 @@ void Catalogue::setDistance(const std::string_view& first, const std::string_vie
     setDistance(name_to_stop_[first], name_to_stop_[second], meters);
 }
 
-RouteInfo Catalogue::routeInfo(const std::string_view& name) const {
-    RouteInfo result;
+Route::Info Catalogue::routeInfo(const std::string_view& name) const {
+    Route::Info result;
     result.name = name;
     if (name_to_bus_.find(name) == name_to_bus_.end()) {
         return result;
@@ -174,8 +176,8 @@ RouteInfo Catalogue::routeInfo(const std::string_view& name) const {
     return result;
 }
 
-StopInfo Catalogue::stopInfo(const std::string_view& name) const {
-    StopInfo result;
+Stop::Info Catalogue::stopInfo(const std::string_view& name) const {
+    Stop::Info result;
     result.name = name;
     if (stop_to_buses_.find(name_to_stop_.at(name)) == stop_to_buses_.end()) {
         throw std::out_of_range("Stop not found");
