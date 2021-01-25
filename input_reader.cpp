@@ -2,16 +2,16 @@
 
 namespace transport {
 
-std::vector<std::string_view> detail::split(const std::string_view text, char delimeter) {
+std::vector<std::string_view> detail::split(const std::string_view text, char delimiter) {
     std::vector<std::string_view> words;
     size_t word_begin = 0;
     size_t word_end = 0;
     while(word_begin != std::string::npos ) {
-        word_begin = text.find_first_not_of(delimeter, word_end);
+        word_begin = text.find_first_not_of(delimiter, word_end);
         if (word_begin == std::string::npos) {
             break;
         }
-        word_end = text.find_first_of(delimeter,word_begin);
+        word_end = text.find_first_of(delimiter,word_begin);
         std::string_view tmp = text.substr(word_begin,word_end-word_begin);
         size_t true_begin = tmp.find_first_not_of(" "s);
         size_t true_end = tmp.find_last_not_of(" "s);
@@ -75,17 +75,17 @@ void input_reader::fillDatabase(std::istream& input) {
         std::string_view busName = route_raw_queries[i].substr(0,doubledotPos);
 
         std::vector<std::string_view> words;
-        const std::string delimetrs = "->"s;
+        const std::string delimiters = "->"s;
         size_t word_begin = doubledotPos+1;
         size_t word_end = doubledotPos+1;
         std::vector<Stop*> stops;
         bool isCycled = false;
         while(word_begin != std::string::npos ) {
-            word_begin = route_raw_queries[i].find_first_not_of(delimetrs, word_end);
+            word_begin = route_raw_queries[i].find_first_not_of(delimiters, word_end);
             if (word_begin == std::string::npos) {
                 break;
             }
-            word_end = route_raw_queries[i].find_first_of(delimetrs,word_begin);
+            word_end = route_raw_queries[i].find_first_of(delimiters,word_begin);
             if (word_end != std::string::npos) {
                 isCycled = (route_raw_queries[i][word_end] == '>')&&(word_end != std::string::npos);
             }

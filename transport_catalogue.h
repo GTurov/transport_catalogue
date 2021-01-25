@@ -31,7 +31,7 @@ public:
     int length() const {return length_;}
     double curvature() const {return curvature_;}
     struct Info {
-        std::string_view name = ""s;
+        std::string name = ""s;
         int stopCount = 0;
         int uniqueStopCount = 0;
         int length = 0;
@@ -74,7 +74,7 @@ public:
     const Coordinates place() const {return place_;}
     const std::string& name() const {return name_;}
     struct Info {
-        std::string_view name = ""s;
+        std::string name = ""s;
         RouteSet routes;
     };
 
