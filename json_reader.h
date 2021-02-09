@@ -1,11 +1,16 @@
-#ifndef JSON_READER_H
-#define JSON_READER_H
+#pragma once
 
+#include "transport_catalogue.h"
+
+#include <iostream>
 
 class json_reader
 {
 public:
-    json_reader();
+    json_reader(transport::Catalogue& catalogue)
+        :catalogue_(catalogue) {}
+    void process_queries(std::istream& in = std::cin, std::ostream& out = std::cout);
+private:
+    transport::Catalogue& catalogue_;
 };
 
-#endif // JSON_READER_H

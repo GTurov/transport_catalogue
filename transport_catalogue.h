@@ -9,8 +9,6 @@
 
 namespace transport {
 
-using namespace std::literals;
-
 namespace detail {
 
 struct RouteNumberHasher {

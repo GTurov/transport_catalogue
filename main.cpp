@@ -1,4 +1,5 @@
 #include "input_reader.h"
+#include "json_reader.h"
 #include "stat_reader.h"
 #include "transport_catalogue.h"
 
@@ -12,6 +13,7 @@ int main()
 {
     Catalogue catalogue;
     input_reader reader(catalogue);
+    json_reader jreader(catalogue);
 
     stringstream  inputData;
     inputData << "18"s << endl
@@ -69,11 +71,12 @@ int main()
 
 
     //reader.fillDatabase(cin);
-    reader.fillDatabase(input);
+    //reader.fillDatabase(input);
+    jreader.process_queries();
     //cout<<"-------------"s<<endl;
     //reader.readQueries(cin);
     //reader.readQueries(queryData);
-    reader.readQueries(input);
+    //reader.readQueries(input);
 
 //    cout<<"-------------"s<<endl;
 //    catalogue.printDistances();
@@ -84,6 +87,7 @@ int main()
 //    cout<<catalogue.distanceBetween("Biryulyovo Zapadnoye"s, "Rossoshanskaya ulitsa"s)<<std::endl;
 //    cout<<catalogue.routeInfo("256"s)<<endl;
 //    cout<<catalogue.routeInfo("750"s)<<endl;
+    cout<<catalogue.routeInfo("114"s)<<endl;
 //    try {
 //        auto r = catalogue.routeInfo("751"s);
 //        cout<<r<<endl;
