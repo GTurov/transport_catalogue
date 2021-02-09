@@ -9,7 +9,7 @@
 namespace transport {
 
 namespace detail {
-std::vector<std::string_view> split(const std::string_view text, char delimeter = ' ');
+std::vector<std::string_view> split(const std::string_view text, char delimiter = ' ');
 }
 
 class input_reader

@@ -1,14 +1,14 @@
 #include "transport_catalogue.h"
 
-#include <ostream>
 #include <iomanip>
-#include <stdexcept>
-
 #include <iostream>
+#include <stdexcept>
+#include <numeric>
+
 
 namespace transport {
 
-Route::Route(const std::string_view name, const std::vector<Stop *> &stops, bool cycled)
+Route::Route(const std::string_view name, const std::vector<Stop *>& stops, bool cycled)
     :name_(name), stops_(stops), isCycled_(cycled) {
     for (int i = 0; i < (int)stops.size()-1; ++i) {
         directLength_ += ComputeDistance(stops[i]->place(),stops[i+1]->place());
@@ -50,12 +50,8 @@ bool detail::RouteComparator::operator() (const Route* lhs, const Route* rhs) co
 }
 
 size_t detail::RouteNumberHasher::operator() (const std::string_view text) const {
-    size_t res = 0;
-    for (int i = 0; i < (int)text.size(); ++i) {
-        res += text[i]-'A';
-        res *= 100;
-    }
-    return res;
+    int mult = 1;
+    return std::accumulate(text.begin(), text.end(), int{0},[&mult](int sum, char c){mult *=100; return sum + (c-'A')*mult;});
 }
 
 std::ostream& operator<<(std::ostream& out, const Stop& stop) {
@@ -79,13 +75,15 @@ std::ostream& operator<<(std::ostream& out, const Stop::Info& stop) {
 }
 
 size_t detail::StopNameHasher::operator() (const std::string_view text) const {
-    size_t res = 0;
-    for (int i = 0; i < (text.size() > 4?4:(int)text.size()); ++i) {
-        res += text[i]-'A';
-        res *= 100;
+    int mult = 1;
+    auto hash_end = text.begin();
+    if (text.size() > 4) {
+        std::advance(hash_end,4);
+    } else {
+        hash_end = text.end();
     }
-    res *= text.size();
-    return res;
+    size_t sum = std::accumulate(text.begin(), hash_end, int{0},[&mult](int sum, char c){mult *=100; return sum + (c-'A')*mult;});
+    return sum*text.size();
 }
 
 size_t detail::StopPairHasher::operator() (const std::pair<Stop*,Stop*> stops) const {
