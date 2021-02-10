@@ -87,7 +87,7 @@ int main()
 //    cout<<catalogue.distanceBetween("Biryulyovo Zapadnoye"s, "Rossoshanskaya ulitsa"s)<<std::endl;
 //    cout<<catalogue.routeInfo("256"s)<<endl;
 //    cout<<catalogue.routeInfo("750"s)<<endl;
-    cout<<catalogue.routeInfo("114"s)<<endl;
+    //cout<<catalogue.routeInfo("114"s)<<endl;
 //    try {
 //        auto r = catalogue.routeInfo("751"s);
 //        cout<<r<<endl;
