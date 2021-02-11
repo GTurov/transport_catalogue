@@ -1,13 +1,17 @@
 #pragma once
 
+#include <cmath>
 #include <cstdint>
 #include <iostream>
 #include <memory>
 #include <optional>
 #include <string>
+#include <variant>
 #include <vector>
 
 namespace svg {
+
+using namespace std::literals;
 
 struct Point {
     Point() = default;
@@ -98,13 +102,93 @@ private:
     std::vector<std::unique_ptr<Object>> objects_;
 };
 
-using Color = std::string;
+
+struct Rgb {
+    Rgb() = default;
+    Rgb(uint8_t red, uint8_t green, uint8_t blue)
+        :red(red), green(green), blue(blue){}
+    uint8_t red = 0;
+    uint8_t green = 0;
+    uint8_t blue = 0;
+};
+
+inline std::ostream& operator<<(std::ostream& out, Rgb color) {
+    using namespace std::literals;
+    out<<"rgb("sv<<+color.red<<","sv<<+color.green<<","sv<<+color.blue<<")"sv;
+    return out;
+}
+
+
+struct Rgba {
+    Rgba() = default;
+    Rgba(uint8_t red, uint8_t green, uint8_t blue, double opacity)
+        :red(red), green(green), blue(blue), opacity(opacity){}
+    uint8_t red = 0;
+    uint8_t green = 0;
+    uint8_t blue = 0;
+    double opacity = 1.0;
+};
+
+inline std::ostream& operator<<(std::ostream& out, Rgba color) {
+
+    out<<"rgba("sv<<+color.red<<","sv<<+color.green<<","sv<<+color.blue<<","sv<<+color.opacity<<")"sv;
+    return out;
+}
+
+using Color = std::variant<std::monostate, std::string, Rgb, Rgba>;
 
 // Объявив в заголовочном файле константу со спецификатором inline,
 // мы сделаем так, чтобы она была одной на все единицы трансляции,
 // которые подключают этот заголовок.
 // В противном случае каждая единица трансляции будет использовать свою копию этой константы
-inline const Color NoneColor{"none"};
+//inline const Color NoneColor{"none"};
+inline const Color NoneColor {};
+
+struct OstreamColorPrinter {
+    std::ostream& out;
+    void operator()(std::monostate) const {
+        out << "none"sv;
+    }
+    void operator()(std::string color) const {
+        out << color;
+    }
+    void operator()(Rgb color) const {
+        out << color;
+    }
+    void operator()(Rgba color) const {
+        out << color;
+    }
+};
+
+inline std::ostream& operator<<(std::ostream& out, Color color) {
+    //std::visit(OstreamColorPrinter{out}, color);
+
+    if (std::holds_alternative<std::monostate>(color)) {
+        out << "none"sv;
+    } else if (std::holds_alternative<std::string>(color)) {
+        out << std::get<std::string>(color);
+    }else if (std::holds_alternative<Rgb>(color)) {
+        out << std::get<Rgb>(color);
+    }else if (std::holds_alternative<Rgba>(color)) {
+                out << std::get<Rgba>(color);
+    }
+
+    return out;
+}
+
+namespace detail {
+
+inline uint8_t Lerp(uint8_t from, uint8_t to, double t) {
+    return static_cast<uint8_t>(std::round((to - from) * t + from));
+}
+
+} // detail
+
+inline svg::Rgb Lerp(svg::Rgb from, svg::Rgb to, double t) {
+    using namespace detail;
+    return {Lerp(from.red, to.red, t), Lerp(from.green, to.green, t), Lerp(from.blue, to.blue, t)};
+}
+
 
 enum class StrokeLineCap {
     BUTT,

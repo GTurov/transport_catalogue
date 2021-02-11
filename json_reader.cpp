@@ -18,6 +18,40 @@ json::Node makeRouteAnswer(int request_id, transport::Route::Info data) {
                                  {"curvature"s,data.curvature}});
 }
 
+svg::Color nodeToColor(const json::Node& n) {
+    if (n.IsString()) {
+        //std::cout<<"String"s<<n.AsString()<<std::endl;
+        return svg::Color(n.AsString());
+    }
+    if (n.IsArray()) {
+        //std::cout<<"Array "s;
+        if (n.AsArray().size() == 3) {
+            uint8_t red = n.AsArray()[0].AsInt();
+            uint8_t green = n.AsArray()[1].AsInt();
+            uint8_t blue = n.AsArray()[2].AsInt();
+//            std::cout<<"rgb "s<<n.AsArray()[0].AsInt()<<" "s
+//                    <<n.AsArray()[1].AsInt()<<" "s
+//                   <<n.AsArray()[2].AsInt()<<" "s
+//                  <<std::endl;
+            return svg::Color(svg::Rgb(red,green,blue));
+        }
+
+        if (n.AsArray().size() == 4) {
+            uint8_t red = n.AsArray()[0].AsInt();
+            uint8_t green = n.AsArray()[1].AsInt();
+            uint8_t blue = n.AsArray()[2].AsInt();
+            double opacity = n.AsArray()[3].AsDouble();
+//            std::cout<<"rgba "s<<n.AsArray()[0].AsInt()<<" "s
+//                    <<n.AsArray()[1].AsInt()<<" "s
+//                   <<n.AsArray()[2].AsInt()<<" "s
+//                     <<n.AsArray()[3].AsDouble()<<" "s
+//                  <<std::endl;
+            return svg::Color(svg::Rgba(red,green,blue,opacity));
+        }
+    }
+    throw std::exception();
+}
+
 void json_reader::process_queries(std::istream& in, std::ostream& out) {
     using namespace json;
     const Document raw_requests = json::Load(in);
@@ -81,6 +115,49 @@ void json_reader::process_queries(std::istream& in, std::ostream& out) {
         //out<<*catalogue_.route(name)<<std::endl;
     }
 
+    // Render settings
+//    {
+        const Dict& render_settings = raw_requests.GetRoot().AsMap().at("render_settings").AsMap();
+        renderSettings rs;
+        rs.width = render_settings.at("width"s).AsDouble();
+        //std::cerr<<rs.width<<std::endl;
+        rs.height = render_settings.at("height"s).AsDouble();
+        //std::cerr<<rs.height<<std::endl;
+
+        rs.padding = render_settings.at("padding"s).AsDouble();
+        //std::cerr<<rs.padding<<std::endl;
+        rs.line_width = render_settings.at("line_width"s).AsDouble();
+        //std::cerr<<rs.line_width<<std::endl;
+        rs.stop_radius = render_settings.at("stop_radius"s).AsDouble();
+        //std::cerr<<rs.stop_radius<<std::endl;
+
+        rs.bus_label_font_size = render_settings.at("bus_label_font_size"s).AsDouble();
+        //std::cerr<<rs.bus_label_font_size<<std::endl;
+        Array raw_bus_label_offset = render_settings.at("bus_label_offset"s).AsArray();
+        rs.bus_label_offset[0] = raw_bus_label_offset[0].AsDouble();
+        rs.bus_label_offset[1] = raw_bus_label_offset[1].AsDouble();
+        //std::cout << rs.bus_label_offset[0] << " "s << rs.bus_label_offset[1]<<std::endl;
+
+
+        rs.stop_label_font_size = render_settings.at("stop_label_font_size"s).AsDouble();
+        //std::cerr<<rs.stop_label_font_size<<std::endl;
+        Array raw_stop_label_offset = render_settings.at("stop_label_offset"s).AsArray();
+        rs.stop_label_offset[0] = raw_stop_label_offset[0].AsDouble();
+        rs.stop_label_offset[1] = raw_stop_label_offset[1].AsDouble();
+        //std::cout << rs.stop_label_offset[0] << " "s << rs.stop_label_offset[1]<<std::endl;
+
+
+        rs.underlayer_color = nodeToColor(render_settings.at("underlayer_color"s));
+        //std::cerr<<rs.underlayer_color<<std::endl;
+        rs.underlayer_width = render_settings.at("underlayer_width"s).AsDouble();
+        //std::cerr<<rs.underlayer_width<<std::endl;
+
+        for (const Node& n: render_settings.at("color_palette"s).AsArray()) {
+            rs.color_palette.push_back(nodeToColor(n));
+            //std::cerr<<nodeToColor(n)<<std::endl;
+        }
+
+  //  }
     // Requests
     const Node stat_requests = raw_requests.GetRoot().AsMap().at("stat_requests");
     //out<<"Stat:\n"s<<stat_requests.Content();
@@ -89,11 +166,14 @@ void json_reader::process_queries(std::istream& in, std::ostream& out) {
     for (const Node& n: stat_requests.AsArray()) {
         request r;
         r.id = n.AsMap().at("id"s).AsInt();
-        r.name = n.AsMap().at("name"s).AsString();
         if(n.AsMap().at("type"s).AsString() == "Stop") {
             r.type = request_type::REQUEST_STOP;
+            r.name = n.AsMap().at("name"s).AsString();
         } else if(n.AsMap().at("type"s).AsString() == "Bus") {
             r.type = request_type::REQUEST_BUS;
+            r.name = n.AsMap().at("name"s).AsString();
+        } else if(n.AsMap().at("type"s).AsString() == "Map") {
+            r.type = request_type::REQUEST_MAP;
         } else {
             throw json::ParsingError("Stat request type parsing error"s);
         }
@@ -125,6 +205,9 @@ void json_reader::process_queries(std::istream& in, std::ostream& out) {
                 answers.push_back(Node(Dict{{"request_id"s,r.id},{"error_message"s, "not found"s}}));
                 }
             //}
+        } break;
+        case request_type::REQUEST_MAP: {
+            std::cout<<"Yandex megamap\n"s;
         } break;
         default:
             throw std::exception();

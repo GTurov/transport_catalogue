@@ -26,3 +26,6 @@ HEADERS += \
     stat_reader.h \
     svg.h \
     transport_catalogue.h
+
+DISTFILES += \
+    input.json
