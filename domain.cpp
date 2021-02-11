@@ -46,6 +46,12 @@ std::ostream& operator<<(std::ostream& out, const Route::Info& route) {
     return out;
 }
 
+bool detail::StopComparator::operator() (const Stop* lhs, const Stop* rhs) const {
+    return std::lexicographical_compare(
+                lhs->name().begin(), lhs->name().end(),
+                rhs->name().begin(), rhs->name().end());
+}
+
 std::ostream& operator<<(std::ostream& out, const Stop& stop) {
     out << "Stop "s << stop.name() <<": "s;
     out << std::setprecision(6);

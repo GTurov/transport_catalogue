@@ -124,7 +124,8 @@ void Document::Render(std::ostream &out) const {
         objects_.at(i)->Render(ctx);
         //out << "\n"sv;
     }
-    out << "</svg>"sv << std::endl;
+    out << "</svg>"sv;
+    out<< std::endl;
 }
 
 }  // namespace svg

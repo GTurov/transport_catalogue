@@ -116,48 +116,45 @@ void json_reader::process_queries(std::istream& in, std::ostream& out) {
     }
 
     // Render settings
-//    {
-        const Dict& render_settings = raw_requests.GetRoot().AsMap().at("render_settings").AsMap();
-        renderSettings rs;
-        rs.width = render_settings.at("width"s).AsDouble();
-        //std::cerr<<rs.width<<std::endl;
-        rs.height = render_settings.at("height"s).AsDouble();
-        //std::cerr<<rs.height<<std::endl;
+    const Dict& render_settings = raw_requests.GetRoot().AsMap().at("render_settings").AsMap();
+    rs_.width = render_settings.at("width"s).AsDouble();
+    //std::cerr<<rs.width<<std::endl;
+    rs_.height = render_settings.at("height"s).AsDouble();
+    //std::cerr<<rs.height<<std::endl;
 
-        rs.padding = render_settings.at("padding"s).AsDouble();
-        //std::cerr<<rs.padding<<std::endl;
-        rs.line_width = render_settings.at("line_width"s).AsDouble();
-        //std::cerr<<rs.line_width<<std::endl;
-        rs.stop_radius = render_settings.at("stop_radius"s).AsDouble();
-        //std::cerr<<rs.stop_radius<<std::endl;
+    rs_.padding = render_settings.at("padding"s).AsDouble();
+    //std::cerr<<rs.padding<<std::endl;
+    rs_.line_width = render_settings.at("line_width"s).AsDouble();
+    //std::cerr<<rs.line_width<<std::endl;
+    rs_.stop_radius = render_settings.at("stop_radius"s).AsDouble();
+    //std::cerr<<rs.stop_radius<<std::endl;
 
-        rs.bus_label_font_size = render_settings.at("bus_label_font_size"s).AsDouble();
-        //std::cerr<<rs.bus_label_font_size<<std::endl;
-        Array raw_bus_label_offset = render_settings.at("bus_label_offset"s).AsArray();
-        rs.bus_label_offset[0] = raw_bus_label_offset[0].AsDouble();
-        rs.bus_label_offset[1] = raw_bus_label_offset[1].AsDouble();
-        //std::cout << rs.bus_label_offset[0] << " "s << rs.bus_label_offset[1]<<std::endl;
+    rs_.bus_label_font_size = render_settings.at("bus_label_font_size"s).AsDouble();
+    //std::cerr<<rs.bus_label_font_size<<std::endl;
+    Array raw_bus_label_offset = render_settings.at("bus_label_offset"s).AsArray();
+    rs_.bus_label_offset[0] = raw_bus_label_offset[0].AsDouble();
+    rs_.bus_label_offset[1] = raw_bus_label_offset[1].AsDouble();
+    //std::cout << rs.bus_label_offset[0] << " "s << rs.bus_label_offset[1]<<std::endl;
 
 
-        rs.stop_label_font_size = render_settings.at("stop_label_font_size"s).AsDouble();
-        //std::cerr<<rs.stop_label_font_size<<std::endl;
-        Array raw_stop_label_offset = render_settings.at("stop_label_offset"s).AsArray();
-        rs.stop_label_offset[0] = raw_stop_label_offset[0].AsDouble();
-        rs.stop_label_offset[1] = raw_stop_label_offset[1].AsDouble();
-        //std::cout << rs.stop_label_offset[0] << " "s << rs.stop_label_offset[1]<<std::endl;
+    rs_.stop_label_font_size = render_settings.at("stop_label_font_size"s).AsDouble();
+    //std::cerr<<rs.stop_label_font_size<<std::endl;
+    Array raw_stop_label_offset = render_settings.at("stop_label_offset"s).AsArray();
+    rs_.stop_label_offset[0] = raw_stop_label_offset[0].AsDouble();
+    rs_.stop_label_offset[1] = raw_stop_label_offset[1].AsDouble();
+    //std::cout << rs.stop_label_offset[0] << " "s << rs.stop_label_offset[1]<<std::endl;
 
 
-        rs.underlayer_color = nodeToColor(render_settings.at("underlayer_color"s));
-        //std::cerr<<rs.underlayer_color<<std::endl;
-        rs.underlayer_width = render_settings.at("underlayer_width"s).AsDouble();
-        //std::cerr<<rs.underlayer_width<<std::endl;
+    rs_.underlayer_color = nodeToColor(render_settings.at("underlayer_color"s));
+    //std::cerr<<rs.underlayer_color<<std::endl;
+    rs_.underlayer_width = render_settings.at("underlayer_width"s).AsDouble();
+    //std::cerr<<rs.underlayer_width<<std::endl;
 
-        for (const Node& n: render_settings.at("color_palette"s).AsArray()) {
-            rs.color_palette.push_back(nodeToColor(n));
-            //std::cerr<<nodeToColor(n)<<std::endl;
-        }
+    for (const Node& n: render_settings.at("color_palette"s).AsArray()) {
+        rs_.color_palette.push_back(nodeToColor(n));
+        //std::cerr<<nodeToColor(n)<<std::endl;
+    }
 
-  //  }
     // Requests
     const Node stat_requests = raw_requests.GetRoot().AsMap().at("stat_requests");
     //out<<"Stat:\n"s<<stat_requests.Content();
@@ -207,7 +204,8 @@ void json_reader::process_queries(std::istream& in, std::ostream& out) {
             //}
         } break;
         case request_type::REQUEST_MAP: {
-            std::cout<<"Yandex megamap\n"s;
+            map_renderer renderer(catalogue_);
+            answers.push_back(Node(Dict{{"map",renderer.render_map(rs_)}}));
         } break;
         default:
             throw std::exception();

@@ -1,6 +1,7 @@
 #include "map_renderer.h"
 
-map_renderer::map_renderer()
-{
+std::string map_renderer::render_map(const renderSettings& settings) const {
+    using namespace std::literals;
 
+    return ""s;
 }
