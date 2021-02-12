@@ -28,15 +28,16 @@ struct renderSettings {
     double underlayer_width = 0;
 
     std::vector<svg::Color> color_palette = {};
+
 };
 
 class MapScaler {
-    // В этой задаче используется модель плоской земли, поддерживаемой тремя слонами, стоящими на трех китах.
-    // Параметр padding необходим для того, чтобы автобус не смог подъехать слишком близко к краю земли
-    // и не упал в бескрайний океан, что привело бы к переполнению координат конечной остановки и выбросу исключения. )))
+    // В отличие от модуля geo.h здесь используется модель плоской земли, поддерживаемой тремя слонами, стоящими
+    // на трех китах. Параметр padding необходим для того, чтобы автобус не смог подъехать слишком близко к краю земли
+    // и не упал в бескрайний океан, что привело бы к переполнению координат конечной остановки и неопределённому поведению. )))
 public:
-    template <typename PointInputIt>
-    MapScaler(PointInputIt points_begin, PointInputIt points_end, double max_width,
+    template <typename StopIt>
+    MapScaler(StopIt points_begin, StopIt points_end, double max_width,
         double max_height, double padding)
         : padding_(padding) {
         if (points_begin == points_end) {
@@ -45,17 +46,17 @@ public:
 
         const auto [left_it, right_it]
             = std::minmax_element(points_begin, points_end, [](auto lhs, auto rhs) {
-            return lhs.lng < rhs.lng;
+            return lhs->place().lng < rhs->place().lng;
                 });
-        min_lon_ = left_it->lng;
-        const double max_lon = right_it->lng;
+        min_lon_ = (*left_it)->place().lng;
+        const double max_lon = (*right_it)->place().lng;
 
         const auto [bottom_it, top_it]
             = std::minmax_element(points_begin, points_end, [](auto lhs, auto rhs) {
-            return lhs.lat < rhs.lat;
+            return lhs->place().lat < rhs->place().lat;
                 });
-        const double min_lat = bottom_it->lat;
-        max_lat_ = top_it->lat;
+        const double min_lat = (*bottom_it)->place().lat;
+        max_lat_ = (*top_it)->place().lat;
 
         std::optional<double> width_zoom;
         if (!this->IsZero(max_lon - min_lon_)) {
@@ -78,7 +79,7 @@ public:
         }
     }
 
-    bool IsZero(double value);
+    bool IsZero(double value) { return std::abs(value) < 1e-6;}
 
     svg::Point operator()(Coordinates coords) const {
         return { (coords.lng - min_lon_) * zoom_coeff_ + padding_,
@@ -100,7 +101,6 @@ public:
         :catalogue_(catalogue), settings_(settings) {}
     std::string render() const;
 private:
-    svg::Point coordinatesToPoint(const Coordinates& place) const;
     const transport::Catalogue& catalogue_;
     const renderSettings& settings_;
 };
