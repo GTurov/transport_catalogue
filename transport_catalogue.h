@@ -36,10 +36,9 @@ public:
     void setDistance(Stop* first, Stop* second, int meters);
     void setDistance(const std::string_view first, const std::string_view second, int meters);
     Route* route(const std::string_view name) const {return name_to_bus_.at(name);}
-    Route* routes(const std::string_view name) const {return name_to_bus_.at(name);}
     Stop* stop(const std::string_view name) const {return name_to_stop_.at(name);}
-//    const RouteSet routes() const {return {};}
-//    const StopSet stops() const {return {};}
+    const RouteSet allRoutes() const {return RouteSet(routes_.begin(), routes_.end());}
+    const StopSet allStops() const {return StopSet(stops_.begin(), stops_.end());}
     const RouteSet routesViaStop(const std::string_view name) const {return stop_to_buses_.at(name_to_stop_.at(name));}
     const Route::Info routeInfo(const std::string_view name) const;
     const Stop::Info stopInfo(const std::string_view name) const;
