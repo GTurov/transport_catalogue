@@ -4,10 +4,10 @@
       "type": "Bus",
       "name": "14",
       "stops": [
-        "Улица Лизы Чайкиной",
-        "Электросети",
-        "Улица Докучаева",
-        "Улица Лизы Чайкиной"
+        "Liza street",
+        "Electroseti",
+        "Dokuchaev street",
+        "Liza street"
       ],
       "is_roundtrip": true
     },
@@ -15,57 +15,57 @@
       "type": "Bus",
       "name": "114",
       "stops": [
-        "Морской вокзал",
-        "Ривьерский мост"
+        "Morskoi vokzal",
+        "Evrejsky bridge"
       ],
       "is_roundtrip": false
     },
     {
       "type": "Stop",
-      "name": "Ривьерский мост",
+      "name": "Evrejsky bridge",
       "latitude": 43.587795,
       "longitude": 39.716901,
       "road_distances": {
-        "Морской вокзал": 850
+        "Morskoi vokzal": 850
       }
     },
     {
       "type": "Stop",
-      "name": "Морской вокзал",
+      "name": "Morskoi vokzal",
       "latitude": 43.581969,
       "longitude": 39.719848,
       "road_distances": {
-        "Ривьерский мост": 850
+        "Evrejsky bridge": 850
       }
     },
     {
       "type": "Stop",
-      "name": "Электросети",
+      "name": "Electroseti",
       "latitude": 43.598701,
       "longitude": 39.730623,
       "road_distances": {
-        "Улица Докучаева": 3000,
-        "Улица Лизы Чайкиной": 4300
+        "Dokuchaev street": 3000,
+        "Liza street": 4300
       }
     },
     {
       "type": "Stop",
-      "name": "Улица Докучаева",
+      "name": "Dokuchaev street",
       "latitude": 43.585586,
       "longitude": 39.733879,
       "road_distances": {
-        "Улица Лизы Чайкиной": 2000,
-        "Электросети": 3000
+        "Liza street": 2000,
+        "Electroseti": 3000
       }
     },
     {
       "type": "Stop",
-      "name": "Улица Лизы Чайкиной",
+      "name": "Liza street",
       "latitude": 43.590317,
       "longitude": 39.746833,
       "road_distances": {
-        "Электросети": 4300,
-        "Улица Докучаева": 2000
+        "Electroseti": 4300,
+        "Dokuchaev street": 2000
       }
     }
   ],

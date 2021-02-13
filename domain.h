@@ -21,7 +21,7 @@ public:
         curvature_ = (double) length_ / directLength_;
     }
     const std::string& name() const {return name_;}
-    const std::vector<Stop*> stops() const {return stops_;}
+    const std::vector<Stop*>& stops() const {return stops_;}
     bool isCycled() const{return isCycled_;}
     int stopsCount() const {return (isCycled_?stops_.size():stops_.size()*2-1);}
     int uniqueStopCount() const {return uniqueStopCount_;}

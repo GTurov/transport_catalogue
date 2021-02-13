@@ -18,11 +18,11 @@ struct renderSettings {
     double stop_radius = 0;
 
     double bus_label_font_size = 0;
-    std::array<double,2> bus_label_offset = {0,0};
+    svg::Point bus_label_offset = {0,0};
     // point
 
     double stop_label_font_size = 0;
-    std::array<double,2> stop_label_offset = {0,0};
+    svg::Point stop_label_offset = {0,0};
 
     svg::Color underlayer_color = {};
     double underlayer_width = 0;

@@ -28,4 +28,5 @@ HEADERS += \
     transport_catalogue.h
 
 DISTFILES += \
-    input.json
+    input.json \
+    stop_label.svg
