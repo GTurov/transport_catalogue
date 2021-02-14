@@ -168,6 +168,7 @@ std::string map_renderer::render() const {
     std::string buffer;
     std::stringstream ss(buffer);
     svg_document.Render(ss);
+    std::cerr<<ss.str();
 
 #ifdef SVG_COMPARE
     std::string s = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n"s +

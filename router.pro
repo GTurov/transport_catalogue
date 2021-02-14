@@ -5,7 +5,6 @@ CONFIG -= qt
 
 SOURCES += \
         domain.cpp \
-        input_reader.cpp \
         json.cpp \
         json_reader.cpp \
         main.cpp \
@@ -18,7 +17,6 @@ SOURCES += \
 HEADERS += \
     domain.h \
     geo.h \
-    input_reader.h \
     json.h \
     json_reader.h \
     map_renderer.h \
@@ -30,6 +28,10 @@ HEADERS += \
 DISTFILES += \
     etalone.svg \
     etalone_map.json \
+    file1.json \
+    file1.svg \
+    file2.json \
+    file2.svg \
     input.json \
     input_rus.json \
     my.svg \

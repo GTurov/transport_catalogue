@@ -100,13 +100,16 @@ Number LoadNumber(std::istream& input) {
 
 Node LoadString(istream& input) {
     string line;
+    int i = 0;
     for (char c; input >> std::noskipws >> c /*&& c != '"'*/;) {
+        ++i;
         if (c == '"') {
             input>>std::skipws;
             return Node(move(line));
         }
         if (c == '\\') {
             input >> c;
+            ++i;
             switch (c) {
             case '"': line.push_back('"'); break;
             case 'n': line.push_back('\n'); break;
@@ -115,14 +118,13 @@ Node LoadString(istream& input) {
             case 't': line.push_back('\t'); break;
             default:
                 input>>std::skipws;
-                throw json::ParsingError("bad string"s);
+                throw json::ParsingError("bad string: symbol #"s+ to_string(i));
             }
         } else {
             line.push_back(c);
         }
     }
     throw json::ParsingError("String parsing error"s);
-
 }
 
 Node LoadDict(istream& input) {
