@@ -1,8 +1,6 @@
 #include "map_renderer.h"
 
-#define SVG_TO_FILE
-
-#include <cassert>
+//#define SVG_TO_FILE
 
 #ifdef SVG_TO_FILE
 #include <fstream> // debug
@@ -26,7 +24,7 @@ std::string map_renderer::render() const {
 
     svg::Document svg_document;
 
-    // Line
+    // Lines
     int color_index = 0;
     for (transport::Route* r: routes_to_draw) {
         if (r->stopsCount() == 0) {
@@ -54,6 +52,7 @@ std::string map_renderer::render() const {
         }
         svg_document.Add(route_line);
     }
+
     // Route labels
     color_index = 0;
     for (transport::Route* r: routes_to_draw) {
@@ -114,7 +113,6 @@ std::string map_renderer::render() const {
                     ;
             svg_document.Add(stop_label);
         }
-        //std::cerr<<"Route "s<<r->name()<<" color is "s<< settings_.color_palette[color_index]<<std::endl;
         ++color_index;
         if(color_index == (int)settings_.color_palette.size()) {
             color_index = 0;
@@ -163,12 +161,9 @@ std::string map_renderer::render() const {
     svg_document.Render(svg_file);
     svg_file.close();
 #endif
-
-
     std::string buffer;
     std::stringstream ss(buffer);
     svg_document.Render(ss);
-    //std::cerr<<ss.str();
 
     return ss.str();
 }

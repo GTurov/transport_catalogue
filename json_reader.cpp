@@ -56,7 +56,7 @@ void json_reader::process_queries(std::istream& in, std::ostream& out) {
     using namespace json;
     const Document raw_requests = json::Load(in);
 
-    const Node base_requests = raw_requests.GetRoot().AsMap().at("base_requests");
+    const Node& base_requests = raw_requests.GetRoot().AsMap().at("base_requests");
     //out<<"Base:\n"s<<base_requests.Content()<<std::endl;
 
     std::vector<const Node*> stop_nodes;
@@ -157,7 +157,7 @@ void json_reader::process_queries(std::istream& in, std::ostream& out) {
     map_renderer renderer(catalogue_, rs_);
 
     // Requests
-    const Node stat_requests = raw_requests.GetRoot().AsMap().at("stat_requests");
+    const Node& stat_requests = raw_requests.GetRoot().AsMap().at("stat_requests");
     //out<<"Stat:\n"s<<stat_requests.Content();
 
     std::vector<request> pure_requests;
