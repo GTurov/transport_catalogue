@@ -26,8 +26,9 @@ Circle& Circle::SetRadius(double radius)  {
 
 void Circle::RenderObject(const RenderContext& context) const {
     auto& out = context.out;
-    out << "<circle cx=\""sv << center_.x << "\" cy=\""sv << center_.y << "\" "sv;
-    out << "r=\""sv << radius_ << "\" "sv;
+    out << "<circle";
+    out << " cx=\""sv << center_.x << "\" cy=\""sv << center_.y << "\""sv;
+    out << " r=\""sv << radius_ << "\""sv;
     RenderAttrs(context.out);
     out << "/>"sv;
 }
@@ -47,7 +48,7 @@ void Polyline::RenderObject(const RenderContext& context) const {
         out << (firstPoint?""sv:" "sv) << p.x << ","sv << p.y;
         firstPoint = false;
     }
-    out << "\" "sv;
+    out << "\""sv;
     RenderAttrs(context.out);
     out << "/>"sv;
 }
@@ -85,16 +86,17 @@ Text& Text::SetData(std::string data) {
 }
 void Text::RenderObject(const RenderContext& context) const {
     auto& out = context.out;
-    out << "<text x=\""sv << position_.x << "\" y=\""sv << position_.y << "\" "sv;
-    out << "dx=\""sv << offset_.x << "\" dy=\""sv << offset_.y << "\" "sv;
-    out << "font-size=\""sv << font_size_ << "\"";
+    out << "<text";
+    RenderAttrs(context.out);
+    out << " x=\""sv << position_.x << "\" y=\""sv << position_.y << "\""sv;
+    out << " dx=\""sv << offset_.x << "\" dy=\""sv << offset_.y << "\""sv;
+    out << " font-size=\""sv << font_size_ << "\"";
     if (font_family_.size() != 0) {
-        out << " font-family=\""sv << font_family_ << "\" "sv;
+        out << " font-family=\""sv << font_family_ << "\""sv;
     }
     if (font_weight_.size() != 0 && font_weight_ != "normal"sv) {
-        out << "font-weight=\""sv << font_weight_ << "\""sv;
+        out << " font-weight=\""sv << font_weight_ << "\""sv;
     }
-    RenderAttrs(context.out);
     out << ">"sv;
     for (char c: data_) {
         switch (c) {
@@ -125,7 +127,7 @@ void Document::Render(std::ostream &out) const {
         //out << "\n"sv;
     }
     out << "</svg>"sv;
-    out<< std::endl;
+    //out<< std::endl;
 }
 
 }  // namespace svg

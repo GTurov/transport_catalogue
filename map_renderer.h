@@ -81,7 +81,7 @@ public:
 
     bool IsZero(double value) { return std::abs(value) < 1e-6;}
 
-    svg::Point operator()(Coordinates coords) const {
+    svg::Point operator()(geo::Coordinates coords) const {
         return { (coords.lng - min_lon_) * zoom_coeff_ + padding_,
                 (max_lat_ - coords.lat) * zoom_coeff_ + padding_ };
     }

@@ -75,9 +75,9 @@ using RouteSet = std::set<Route*, detail::RouteComparator>;
 
 class Stop {
 public:
-    Stop(const std::string_view name, const Coordinates place)
+    Stop(const std::string_view name, const geo::Coordinates place)
         :name_(name), place_(place)  {}
-    const Coordinates place() const {return place_;}
+    const geo::Coordinates place() const {return place_;}
     const std::string& name() const {return name_;}
     struct Info {
         std::string name = ""s;
@@ -86,7 +86,7 @@ public:
 
 private:
     std::string name_;
-    Coordinates place_;
+    geo::Coordinates place_;
 };
 
 namespace detail {

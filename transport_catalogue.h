@@ -30,7 +30,7 @@ public:
     Catalogue(){}
     ~Catalogue();
     void addStop(Stop* stop);
-    void addStop(const std::string_view name, Coordinates place);
+    void addStop(const std::string_view name, geo::Coordinates place);
     void addRoute(Route* route);
     void addRoute(const std::string_view name, std::vector<Stop*> stops, bool cycled = false);
     void setDistance(Stop* first, Stop* second, int meters);

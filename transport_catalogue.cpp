@@ -55,7 +55,7 @@ void Catalogue::addStop(Stop* stop) {
     }
 }
 
-void Catalogue::addStop(const std::string_view name, Coordinates place) {
+void Catalogue::addStop(const std::string_view name, geo::Coordinates place) {
     auto* stop = new Stop(name, place);
     //std::cout<<*stop<<std::endl; // debug
     addStop(stop);

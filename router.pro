@@ -28,5 +28,10 @@ HEADERS += \
     transport_catalogue.h
 
 DISTFILES += \
+    etalone.svg \
+    etalone_map.json \
     input.json \
+    input_rus.json \
+    my.svg \
+    my_map.json \
     stop_label.svg

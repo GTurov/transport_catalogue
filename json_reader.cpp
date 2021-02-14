@@ -205,7 +205,7 @@ void json_reader::process_queries(std::istream& in, std::ostream& out) {
         } break;
         case request_type::REQUEST_MAP: {
             map_renderer renderer(catalogue_, rs_);
-            answers.push_back(Node(Dict{{"map",renderer.render()}}));
+            answers.push_back(Node(Dict{{"request_id"s,r.id},{"map",renderer.render()}}));
         } break;
         default:
             throw std::exception();
