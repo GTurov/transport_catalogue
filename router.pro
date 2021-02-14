@@ -26,6 +26,7 @@ HEADERS += \
     transport_catalogue.h
 
 DISTFILES += \
+    coi.json \
     etalone.svg \
     etalone_map.json \
     file1.json \

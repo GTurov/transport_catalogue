@@ -1,7 +1,6 @@
 #include "map_renderer.h"
 
-//#define SVG_TO_FILE
-//#define SVG_COMPARE
+#define SVG_TO_FILE
 
 #include <cassert>
 
@@ -40,6 +39,7 @@ std::string map_renderer::render() const {
                 .SetStrokeLineCap(svg::StrokeLineCap::ROUND)
                 .SetStrokeLineJoin(svg::StrokeLineJoin::ROUND)
                 ;
+        std::cerr<<"Route "s<<r->name()<<" color is "s<< settings_.color_palette[color_index]<<std::endl;
         ++color_index;
         if(color_index == (int)settings_.color_palette.size()) {
             color_index = 0;
@@ -54,7 +54,6 @@ std::string map_renderer::render() const {
         }
         svg_document.Add(route_line);
     }
-
     // Route labels
     color_index = 0;
     for (transport::Route* r: routes_to_draw) {
@@ -114,10 +113,11 @@ std::string map_renderer::render() const {
                     .SetFillColor(settings_.color_palette[color_index])
                     ;
             svg_document.Add(stop_label);
-            ++color_index;
-            if(color_index == (int)settings_.color_palette.size()) {
-                color_index = 0;
-            }
+        }
+        //std::cerr<<"Route "s<<r->name()<<" color is "s<< settings_.color_palette[color_index]<<std::endl;
+        ++color_index;
+        if(color_index == (int)settings_.color_palette.size()) {
+            color_index = 0;
         }
     }
 
@@ -168,54 +168,7 @@ std::string map_renderer::render() const {
     std::string buffer;
     std::stringstream ss(buffer);
     svg_document.Render(ss);
-    std::cerr<<ss.str();
-
-#ifdef SVG_COMPARE
-    std::string s = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n"s +
-    "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\">\n"s +
-    "  <polyline points=\"99.2283,329.5 50,232.18 99.2283,329.5\" fill=\"none\" stroke=\"green\" stroke-width=\"14\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>\n"s +
-    "  <polyline points=\"550,190.051 279.22,50 333.61,269.08 550,190.051\" fill=\"none\" stroke=\"rgb(255,160,0)\" stroke-width=\"14\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>\n"s +
-    "  <text fill=\"rgba(255,255,255,0.85)\" stroke=\"rgba(255,255,255,0.85)\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\" x=\"99.2283\" y=\"329.5\" dx=\"7\" dy=\"15\" font-size=\"20\" font-family=\"Verdana\" font-weight=\"bold\">114</text>\n"s +
-    "  <text fill=\"green\" x=\"99.2283\" y=\"329.5\" dx=\"7\" dy=\"15\" font-size=\"20\" font-family=\"Verdana\" font-weight=\"bold\">114</text>\n"s +
-    "  <text fill=\"rgba(255,255,255,0.85)\" stroke=\"rgba(255,255,255,0.85)\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\" x=\"50\" y=\"232.18\" dx=\"7\" dy=\"15\" font-size=\"20\" font-family=\"Verdana\" font-weight=\"bold\">114</text>\n"s +
-    "  <text fill=\"green\" x=\"50\" y=\"232.18\" dx=\"7\" dy=\"15\" font-size=\"20\" font-family=\"Verdana\" font-weight=\"bold\">114</text>\n"s +
-    "  <text fill=\"rgba(255,255,255,0.85)\" stroke=\"rgba(255,255,255,0.85)\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\" x=\"550\" y=\"190.051\" dx=\"7\" dy=\"15\" font-size=\"20\" font-family=\"Verdana\" font-weight=\"bold\">14</text>\n"s +
-    "  <text fill=\"rgb(255,160,0)\" x=\"550\" y=\"190.051\" dx=\"7\" dy=\"15\" font-size=\"20\" font-family=\"Verdana\" font-weight=\"bold\">14</text>\n"s +
-    "  <circle cx=\"99.2283\" cy=\"329.5\" r=\"5\" fill=\"white\"/>\n"s +
-    "  <circle cx=\"50\" cy=\"232.18\" r=\"5\" fill=\"white\"/>\n"s +
-    "  <circle cx=\"333.61\" cy=\"269.08\" r=\"5\" fill=\"white\"/>\n"s +
-    "  <circle cx=\"550\" cy=\"190.051\" r=\"5\" fill=\"white\"/>\n"s +
-    "  <circle cx=\"279.22\" cy=\"50\" r=\"5\" fill=\"white\"/>\n"s +
-    "  <text fill=\"rgba(255,255,255,0.85)\" stroke=\"rgba(255,255,255,0.85)\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\" x=\"99.2283\" y=\"329.5\" dx=\"7\" dy=\"-3\" font-size=\"20\" font-family=\"Verdana\">Морской вокзал</text>\n"s +
-    "  <text fill=\"black\" x=\"99.2283\" y=\"329.5\" dx=\"7\" dy=\"-3\" font-size=\"20\" font-family=\"Verdana\">Морской вокзал</text>\n"s +
-    "  <text fill=\"rgba(255,255,255,0.85)\" stroke=\"rgba(255,255,255,0.85)\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\" x=\"50\" y=\"232.18\" dx=\"7\" dy=\"-3\" font-size=\"20\" font-family=\"Verdana\">Ривьерский мост</text>\n"s +
-    "  <text fill=\"black\" x=\"50\" y=\"232.18\" dx=\"7\" dy=\"-3\" font-size=\"20\" font-family=\"Verdana\">Ривьерский мост</text>\n"s +
-    "  <text fill=\"rgba(255,255,255,0.85)\" stroke=\"rgba(255,255,255,0.85)\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\" x=\"333.61\" y=\"269.08\" dx=\"7\" dy=\"-3\" font-size=\"20\" font-family=\"Verdana\">Улица Докучаева</text>\n"s +
-    "  <text fill=\"black\" x=\"333.61\" y=\"269.08\" dx=\"7\" dy=\"-3\" font-size=\"20\" font-family=\"Verdana\">Улица Докучаева</text>\n"s +
-    "  <text fill=\"rgba(255,255,255,0.85)\" stroke=\"rgba(255,255,255,0.85)\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\" x=\"550\" y=\"190.051\" dx=\"7\" dy=\"-3\" font-size=\"20\" font-family=\"Verdana\">Улица Лизы Чайкиной</text>\n"s +
-    "  <text fill=\"black\" x=\"550\" y=\"190.051\" dx=\"7\" dy=\"-3\" font-size=\"20\" font-family=\"Verdana\">Улица Лизы Чайкиной</text>\n"s +
-    "  <text fill=\"rgba(255,255,255,0.85)\" stroke=\"rgba(255,255,255,0.85)\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\" x=\"279.22\" y=\"50\" dx=\"7\" dy=\"-3\" font-size=\"20\" font-family=\"Verdana\">Электросети</text>\n"s +
-    "  <text fill=\"black\" x=\"279.22\" y=\"50\" dx=\"7\" dy=\"-3\" font-size=\"20\" font-family=\"Verdana\">Электросети</text>\n"s +
-    "</svg>"s;
-
-    std::istringstream got(ss.str());
-    std::istringstream need(s);
-    std::string lhs, rhs;
-    int str_num = 0;
-    while (getline(got, lhs) && getline(need, rhs)) {
-        if(lhs != rhs) {
-            std::cerr << ++str_num << std::endl;
-            std::cerr<<lhs<<std::endl<<rhs<<std::endl;
-            for(int i =0; i < (int)lhs.size(); ++i) {
-                std::cerr<<(lhs[i]==rhs[i]?' ':'^');
-            }
-            assert(false);
-        }
-    }
-
-
-    assert(s.size() == ss.str().size());
-#endif
+    //std::cerr<<ss.str();
 
     return ss.str();
 }
