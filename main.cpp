@@ -1,6 +1,9 @@
 #include "json_reader.h"
 #include "transport_catalogue.h"
 
+#include "test_example_functions.h"
+#include "log_duration.h"
+
 
 #include <sstream>
 #include <cassert>
@@ -115,11 +118,11 @@ void json_answer_test(json_reader& reader){
 
 int main()
 {
-    Catalogue catalogue;
-    json_reader jreader(catalogue);
-    //json_answer_test(jreader);
-
-    jreader.process_queries();
+    LOG_DURATION("processing"s);
+    TestTransportCatalogue();
+    //Catalogue catalogue;
+    //json_reader jreader(catalogue);
+    //jreader.process_queries();
 
 
     return 0;

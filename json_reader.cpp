@@ -55,6 +55,7 @@ svg::Color nodeToColor(const json::Node& n) {
 
 void json_reader::process_queries(std::istream& in, std::ostream& out) {
     using namespace json;
+
     const Document raw_requests = json::Load(in);
 
     const Node& base_requests = raw_requests.GetRoot().AsMap().at("base_requests");
@@ -162,6 +163,7 @@ void json_reader::process_queries(std::istream& in, std::ostream& out) {
         }
     }
     map_renderer renderer(catalogue_, rs_);
+
 
     // Requests
     const Node& stat_requests = raw_requests.GetRoot().AsMap().at("stat_requests");

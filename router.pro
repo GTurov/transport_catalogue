@@ -12,6 +12,7 @@ SOURCES += \
         request_handler.cpp \
         stat_reader.cpp \
         svg.cpp \
+        test_example_functions.cpp \
         transport_catalogue.cpp
 
 HEADERS += \
@@ -19,10 +20,12 @@ HEADERS += \
     geo.h \
     json.h \
     json_reader.h \
+    log_duration.h \
     map_renderer.h \
     request_handler.h \
     stat_reader.h \
     svg.h \
+    test_example_functions.h \
     transport_catalogue.h
 
 DISTFILES += \

@@ -27,8 +27,8 @@ std::string map_renderer::render() const {
     // Lines
     int color_index = 0;
     for (transport::Route* r: routes_to_draw) {
-        if (r->stopsCount() == 0) {
-            break;
+        if (r->stopsCount() < 2) {
+            continue;
         }
         svg::Polyline route_line = svg::Polyline()
                 .SetStrokeColor(settings_.color_palette[color_index])
@@ -57,7 +57,7 @@ std::string map_renderer::render() const {
     color_index = 0;
     for (transport::Route* r: routes_to_draw) {
         if (r->stopsCount() == 0) {
-            break;
+            continue;
         }
 
         svg::Text route_label_underlayer = svg::Text()
@@ -86,7 +86,7 @@ std::string map_renderer::render() const {
                 ;
         svg_document.Add(route_label);
 
-        if (!r->isCycled()) {
+        if (!r->isCycled() && r->stops().size()>1) {
             svg::Text stop_label_underlayer = svg::Text()
                     .SetPosition(scaler((*r->stops().rbegin())->place()))
                     .SetOffset(settings_.bus_label_offset)

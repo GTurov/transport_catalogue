@@ -143,6 +143,39 @@ Node LoadDict(istream& input) {
     throw json::ParsingError("Map parsing error"s);
 }
 
+//Node LoadBool(istream& input) {
+//    static const string_view true_sv = "true"sv;
+//    static const string_view false_sv = "false"sv;
+//    size_t char_count = 0;
+//    size_t true_count = 0;
+//    size_t false_count = 0;
+//    for (char c; input >> c;) {
+//        ++char_count;
+//        if (c == true_sv[char_count-1]) {
+//            ++true_count;
+//            if (true_count == true_sv.size()) {
+//                if (iswalnum(input.peek())) {
+//                    throw ParsingError("Ffffail"s);
+//                }
+//                return Node(true);
+//            }
+//            continue;
+//        }
+//        if (c == false_sv[char_count-1]) {
+//            ++false_count;
+//            if (false_count == false_sv.size()) {
+//                if (iswalnum(input.peek())) {
+//                    throw ParsingError("Ffffail"s);
+//                }
+//                return Node(false);
+//            }
+//            continue;
+//        }
+//        throw json::ParsingError("bool type error"s);
+//    }
+//    throw json::ParsingError("bool type error"s);
+//}
+
 Node LoadBool(istream& input) {
     static const string_view true_sv = "true"sv;
     static const string_view false_sv = "false"sv;
@@ -151,26 +184,27 @@ Node LoadBool(istream& input) {
     size_t false_count = 0;
     for (char c; input >> c;) {
         ++char_count;
-        if (c == true_sv[char_count-1]) {
-            ++true_count;
-            if (true_count == true_sv.size()) {
-                if (std::iswalnum(input.peek())) {
-                    throw ParsingError("Ffffail"s);
-                }
-                return Node(true);
-            }
-            continue;
-        }
-        if (c == false_sv[char_count-1]) {
+        if (c == false_sv[char_count - 1]) {
             ++false_count;
             if (false_count == false_sv.size()) {
-                if (std::iswalnum(input.peek())) {
-                    throw ParsingError("Ffffail"s);
+                if (iswalnum(input.peek())) {
+                    throw ParsingError("Fail"s);
                 }
                 return Node(false);
             }
             continue;
         }
+        if (c == true_sv[char_count - 1]) {
+            ++true_count;
+            if (true_count == true_sv.size()) {
+                if (iswalnum(input.peek())) {
+                    throw ParsingError("Fail"s);
+                }
+                return Node(true);
+            }
+            continue;
+        }
+
         throw json::ParsingError("bool type error"s);
     }
     throw json::ParsingError("bool type error"s);
