@@ -3,7 +3,7 @@
 #include "domain.h"
 
 //#include <iomanip>
-//#include <iostream>
+#include <iostream>
 #include <stdexcept>
 #include <numeric>
 
@@ -101,12 +101,32 @@ void Catalogue::setDistance(const std::string_view first, const std::string_view
     setDistance(name_to_stop_[first], name_to_stop_[second], meters);
 }
 
-const Route::Info Catalogue::routeInfo(const std::string_view name) const {
+std::optional<Route*> Catalogue::route(const std::string_view name) const {
+    if (name_to_bus_.find(name) == name_to_bus_.end()) {
+        return std::nullopt;
+    };
+    return name_to_bus_.at(name);
+}
+std::optional<Stop*> Catalogue::stop(const std::string_view name) const {
+    if (name_to_stop_.find(name) == name_to_stop_.end()) {
+        return std::nullopt;
+    };
+    return name_to_stop_.at(name);
+}
+
+const RouteSet Catalogue::routesViaStop(const std::string_view name) const {
+    if (stop_to_buses_.find(name_to_stop_.at(name)) == stop_to_buses_.end()) {
+        return {};
+    };
+    return stop_to_buses_.at(name_to_stop_.at(name));
+}
+
+std::optional<const Route::Info> Catalogue::routeInfo(const std::string_view name) const {
+    if (name_to_bus_.find(name) == name_to_bus_.end()) {
+        return std::nullopt;
+    };
     Route::Info result;
     result.name = name;
-    if (name_to_bus_.find(name) == name_to_bus_.end()) {
-        return result;
-    };
     Route * route = name_to_bus_.at(name);
     result.stopCount = route->stopsCount();
     result.uniqueStopCount = route->uniqueStopCount();
@@ -115,12 +135,12 @@ const Route::Info Catalogue::routeInfo(const std::string_view name) const {
     return result;
 }
 
-const Stop::Info Catalogue::stopInfo(const std::string_view name) const {
+std::optional<const Stop::Info> Catalogue::stopInfo(const std::string_view name) const {
+    if (name_to_stop_.find(name) == name_to_stop_.end()) {
+        return std::nullopt;
+    }
     Stop::Info result;
     result.name = name;
-    if (stop_to_buses_.find(name_to_stop_.at(name)) == stop_to_buses_.end()) {
-        throw std::out_of_range("Stop not found");
-    };
     result.routes = stop_to_buses_.at(name_to_stop_.at(name));
     return result;
 }

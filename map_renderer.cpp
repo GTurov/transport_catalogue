@@ -37,7 +37,7 @@ std::string map_renderer::render() const {
                 .SetStrokeLineCap(svg::StrokeLineCap::ROUND)
                 .SetStrokeLineJoin(svg::StrokeLineJoin::ROUND)
                 ;
-        std::cerr<<"Route "s<<r->name()<<" color is "s<< settings_.color_palette[color_index]<<std::endl;
+        //std::cerr<<"Route "s<<r->name()<<" color is "s<< settings_.color_palette[color_index]<<std::endl;
         ++color_index;
         if(color_index == (int)settings_.color_palette.size()) {
             color_index = 0;

@@ -8,8 +8,8 @@
 #include <iostream>
 #include <string>
 
-json::Node makeStopAnswer(int request_id, transport::Stop::Info data);
-json::Node makeRouteAnswer(int request_id, transport::Route::Info data);
+json::Node makeStopAnswer(int request_id, const transport::Stop::Info& data);
+json::Node makeRouteAnswer(int request_id, const transport::Route::Info& data);
 
 svg::Color nodeToColor(const json::Node& n);
 

@@ -3,6 +3,7 @@
 #include "domain.h"
 
 #include <deque>
+#include <optional>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -35,13 +36,13 @@ public:
     void addRoute(const std::string_view name, std::vector<Stop*> stops, bool cycled = false);
     void setDistance(Stop* first, Stop* second, int meters);
     void setDistance(const std::string_view first, const std::string_view second, int meters);
-    Route* route(const std::string_view name) const {return name_to_bus_.at(name);}
-    Stop* stop(const std::string_view name) const {return name_to_stop_.at(name);}
+    std::optional<Route*> route(const std::string_view name) const;
+    std::optional<Stop*> stop(const std::string_view name) const;
     const RouteSet allRoutes() const {return RouteSet(routes_.begin(), routes_.end());}
     const StopSet allStops() const {return StopSet(stops_.begin(), stops_.end());}
-    const RouteSet routesViaStop(const std::string_view name) const {return stop_to_buses_.at(name_to_stop_.at(name));}
-    const Route::Info routeInfo(const std::string_view name) const;
-    const Stop::Info stopInfo(const std::string_view name) const;
+    const RouteSet routesViaStop(const std::string_view name) const;
+    std::optional<const Route::Info> routeInfo(const std::string_view name) const;
+    std::optional<const Stop::Info> stopInfo(const std::string_view name) const;
     int distanceBetween(Stop* first, Stop* second) const;
     int distanceBetween(const std::string_view first, const std::string_view second) const;
 

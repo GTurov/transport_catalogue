@@ -1,10 +1,11 @@
 #include "json_reader.h"
 
 #include <vector>
+#include <optional>
 
 using namespace std::literals;
 
-json::Node makeStopAnswer(int request_id, transport::Stop::Info data) {
+json::Node makeStopAnswer(int request_id, const transport::Stop::Info& data) {
     json::Array routes;
     for (transport::Route* r: data.routes) {
         routes.push_back(json::Node(r->name()));
@@ -12,7 +13,7 @@ json::Node makeStopAnswer(int request_id, transport::Stop::Info data) {
     return json::Node(json::Dict{{"request_id"s,request_id},{"buses",std::move(routes)}});
 }
 
-json::Node makeRouteAnswer(int request_id, transport::Route::Info data) {
+json::Node makeRouteAnswer(int request_id, const transport::Route::Info& data) {
     return json::Node(json::Dict{{"request_id"s,request_id},{"route_length",data.length},
                                  {"stop_count"s, data.stopCount},{"unique_stop_count"s,data.uniqueStopCount},
                                  {"curvature"s,data.curvature}});
@@ -109,50 +110,56 @@ void json_reader::process_queries(std::istream& in, std::ostream& out) {
         bool isCycled = n->AsMap().at("is_roundtrip"s).AsBool();
         std::vector<transport::Stop*> stops;
         for (const Node& n: n->AsMap().at("stops"s).AsArray()) {
-            stops.push_back(catalogue_.stop(n.AsString()));
+            if (auto stop = catalogue_.stop(n.AsString()); stop) {
+                stops.push_back(*stop);
+            } else {
+                throw std::invalid_argument("Invalid stop: "s + n.AsString());
+            }
         }
         catalogue_.addRoute(name, std::move(stops), isCycled);
         //out<<*catalogue_.route(name)<<std::endl;
     }
 
     // Render settings
-    const Dict& render_settings = raw_requests.GetRoot().AsMap().at("render_settings").AsMap();
-    rs_.width = render_settings.at("width"s).AsDouble();
-    //std::cerr<<rs.width<<std::endl;
-    rs_.height = render_settings.at("height"s).AsDouble();
-    //std::cerr<<rs.height<<std::endl;
+    if (raw_requests.GetRoot().AsMap().find("render_settings") != raw_requests.GetRoot().AsMap().end()) {
+        const Dict& render_settings = raw_requests.GetRoot().AsMap().at("render_settings"s).AsMap();
+        rs_.width = render_settings.at("width"s).AsDouble();
+        //std::cerr<<rs.width<<std::endl;
+        rs_.height = render_settings.at("height"s).AsDouble();
+        //std::cerr<<rs.height<<std::endl;
 
-    rs_.padding = render_settings.at("padding"s).AsDouble();
-    //std::cerr<<rs.padding<<std::endl;
-    rs_.line_width = render_settings.at("line_width"s).AsDouble();
-    //std::cerr<<rs.line_width<<std::endl;
-    rs_.stop_radius = render_settings.at("stop_radius"s).AsDouble();
-    //std::cerr<<rs.stop_radius<<std::endl;
+        rs_.padding = render_settings.at("padding"s).AsDouble();
+        //std::cerr<<rs.padding<<std::endl;
+        rs_.line_width = render_settings.at("line_width"s).AsDouble();
+        //std::cerr<<rs.line_width<<std::endl;
+        rs_.stop_radius = render_settings.at("stop_radius"s).AsDouble();
+        //std::cerr<<rs.stop_radius<<std::endl;
 
-    rs_.bus_label_font_size = render_settings.at("bus_label_font_size"s).AsDouble();
-    //std::cerr<<rs.bus_label_font_size<<std::endl;
-    Array raw_bus_label_offset = render_settings.at("bus_label_offset"s).AsArray();
-    rs_.bus_label_offset.x = raw_bus_label_offset[0].AsDouble();
-    rs_.bus_label_offset.y = raw_bus_label_offset[1].AsDouble();
-    //std::cout << rs.bus_label_offset[0] << " "s << rs.bus_label_offset[1]<<std::endl;
-
-
-    rs_.stop_label_font_size = render_settings.at("stop_label_font_size"s).AsDouble();
-    //std::cerr<<rs.stop_label_font_size<<std::endl;
-    Array raw_stop_label_offset = render_settings.at("stop_label_offset"s).AsArray();
-    rs_.stop_label_offset.x = raw_stop_label_offset[0].AsDouble();
-    rs_.stop_label_offset.y = raw_stop_label_offset[1].AsDouble();
-    //std::cout << rs.stop_label_offset[0] << " "s << rs.stop_label_offset[1]<<std::endl;
+        rs_.bus_label_font_size = render_settings.at("bus_label_font_size"s).AsDouble();
+        //std::cerr<<rs.bus_label_font_size<<std::endl;
+        Array raw_bus_label_offset = render_settings.at("bus_label_offset"s).AsArray();
+        rs_.bus_label_offset.x = raw_bus_label_offset[0].AsDouble();
+        rs_.bus_label_offset.y = raw_bus_label_offset[1].AsDouble();
+        //std::cout << rs.bus_label_offset[0] << " "s << rs.bus_label_offset[1]<<std::endl;
 
 
-    rs_.underlayer_color = nodeToColor(render_settings.at("underlayer_color"s));
-    //std::cerr<<rs.underlayer_color<<std::endl;
-    rs_.underlayer_width = render_settings.at("underlayer_width"s).AsDouble();
-    //std::cerr<<rs.underlayer_width<<std::endl;
+        rs_.stop_label_font_size = render_settings.at("stop_label_font_size"s).AsDouble();
+        //std::cerr<<rs.stop_label_font_size<<std::endl;
+        Array raw_stop_label_offset = render_settings.at("stop_label_offset"s).AsArray();
+        rs_.stop_label_offset.x = raw_stop_label_offset[0].AsDouble();
+        rs_.stop_label_offset.y = raw_stop_label_offset[1].AsDouble();
+        //std::cout << rs.stop_label_offset[0] << " "s << rs.stop_label_offset[1]<<std::endl;
 
-    for (const Node& n: render_settings.at("color_palette"s).AsArray()) {
-        rs_.color_palette.push_back(nodeToColor(n));
-        //std::cerr<<nodeToColor(n)<<std::endl;
+
+        rs_.underlayer_color = nodeToColor(render_settings.at("underlayer_color"s));
+        //std::cerr<<rs.underlayer_color<<std::endl;
+        rs_.underlayer_width = render_settings.at("underlayer_width"s).AsDouble();
+        //std::cerr<<rs.underlayer_width<<std::endl;
+
+        for (const Node& n: render_settings.at("color_palette"s).AsArray()) {
+            rs_.color_palette.push_back(nodeToColor(n));
+            //std::cerr<<nodeToColor(n)<<std::endl;
+        }
     }
     map_renderer renderer(catalogue_, rs_);
 
@@ -184,25 +191,19 @@ void json_reader::process_queries(std::istream& in, std::ostream& out) {
     for (const request& r: pure_requests) {
         switch (r.type) {
         case request_type::REQUEST_STOP: {
-            try {
-                transport::Stop::Info stop_info = catalogue_.stopInfo(r.name);
-                answers.push_back(makeStopAnswer(r.id, stop_info));
-
-            }  catch (std::exception& e) {
+            //std::cerr<<r.name<<std::endl;
+            if (auto stop_info = catalogue_.stopInfo(r.name); stop_info) {
+                answers.push_back(makeStopAnswer(r.id, *stop_info));
+            } else {
                 answers.push_back(Node(Dict{{"request_id"s,r.id},{"error_message"s, "not found"s}}));
             }
-
         } break;
         case request_type::REQUEST_BUS: {
-            //try {
-                transport::Route::Info route_info = catalogue_.routeInfo(r.name);
-                if (route_info.length != 0) {
-                answers.push_back(makeRouteAnswer(r.id, route_info));
-                } else {
-            //}  catch (std::exception& e) {
+            if (auto route_info = catalogue_.routeInfo(r.name); route_info) {
+                answers.push_back(makeRouteAnswer(r.id, *route_info));
+            } else {
                 answers.push_back(Node(Dict{{"request_id"s,r.id},{"error_message"s, "not found"s}}));
-                }
-            //}
+            }
         } break;
         case request_type::REQUEST_MAP: {
             answers.push_back(Node(Dict{{"request_id"s,r.id},{"map",renderer.render()}}));
