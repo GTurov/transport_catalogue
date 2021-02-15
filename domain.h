@@ -47,17 +47,17 @@ private:
 
 namespace detail {
 
-//template <class ObjectWithName>
-//struct ObjectWithNameComparator {
-//    bool operator() (const ObjectWithName* lhs, const ObjectWithName* rhs)const {
-//        return std::lexicographical_compare(
-//                    lhs->name().begin(), lhs->name().end(),
-//                    rhs->name().begin(), rhs->name().end());
-//    }
-//};
+template <class ObjectWithName>
+struct ObjectWithNameComparator {
+    bool operator() (const ObjectWithName* lhs, const ObjectWithName* rhs)const {
+        return std::lexicographical_compare(
+                    lhs->name().begin(), lhs->name().end(),
+                    rhs->name().begin(), rhs->name().end());
+    }
+};
 
-//template <class ObjectWithName>
-//using ObjectWithNameSet = std::set<ObjectWithName*, detail::ObjectWithNameComparator<ObjectWithName>>;
+template <class ObjectWithName>
+using ObjectWithNameSet = std::set<ObjectWithName*, detail::ObjectWithNameComparator<ObjectWithName>>;
 
 struct RouteComparator {
     bool operator() (const Route* lhs, const Route* rhs)const ;
@@ -69,9 +69,9 @@ std::ostream& operator<<(std::ostream& out, const Route& route);
 
 std::ostream& operator<<(std::ostream& out, const Route::Info& route);
 
-using RouteSet = std::set<Route*, detail::RouteComparator>;
+//using RouteSet = std::set<Route*, detail::RouteComparator>;
 
-//using RouteSet = detail::ObjectWithNameSet<Route>;
+using RouteSet = detail::ObjectWithNameSet<Route>;
 
 class Stop {
 public:
@@ -101,7 +101,7 @@ std::ostream& operator<<(std::ostream& out, const Stop& stop);
 
 std::ostream& operator<<(std::ostream& out, const Stop::Info& stop);
 
-using StopSet = std::set<Stop*, detail::StopComparator>;
-//using StopSet = detail::ObjectWithNameSet<Stop>;
+//using StopSet = std::set<Stop*, detail::StopComparator>;
+using StopSet = detail::ObjectWithNameSet<Stop>;
 
 } // transport

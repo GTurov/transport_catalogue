@@ -21,10 +21,10 @@
       "is_roundtrip": true
     },
     {
+      "is_roundtrip": false,
       "type": "Bus",
       "name": "750",
-      "stops": ["Tolstopaltsevo", "Marushkino", "Marushkino", "Rasskazovka"],
-      "is_roundtrip": false
+      "stops": ["Tolstopaltsevo", "Marushkino", "Marushkino", "Rasskazovka"]
     },
     {
       "type": "Stop",

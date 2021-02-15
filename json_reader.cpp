@@ -135,7 +135,7 @@ void json_reader::process_queries(std::istream& in, std::ostream& out) {
         rs_.stop_radius = render_settings.at("stop_radius"s).AsDouble();
         //std::cerr<<rs.stop_radius<<std::endl;
 
-        rs_.bus_label_font_size = render_settings.at("bus_label_font_size"s).AsDouble();
+        rs_.bus_label_font_size = render_settings.at("bus_label_font_size"s).AsInt();
         //std::cerr<<rs.bus_label_font_size<<std::endl;
         Array raw_bus_label_offset = render_settings.at("bus_label_offset"s).AsArray();
         rs_.bus_label_offset.x = raw_bus_label_offset[0].AsDouble();
@@ -143,7 +143,7 @@ void json_reader::process_queries(std::istream& in, std::ostream& out) {
         //std::cout << rs.bus_label_offset[0] << " "s << rs.bus_label_offset[1]<<std::endl;
 
 
-        rs_.stop_label_font_size = render_settings.at("stop_label_font_size"s).AsDouble();
+        rs_.stop_label_font_size = render_settings.at("stop_label_font_size"s).AsInt();
         //std::cerr<<rs.stop_label_font_size<<std::endl;
         Array raw_stop_label_offset = render_settings.at("stop_label_offset"s).AsArray();
         rs_.stop_label_offset.x = raw_stop_label_offset[0].AsDouble();
