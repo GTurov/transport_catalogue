@@ -37,7 +37,6 @@ std::string map_renderer::render() const {
                 .SetStrokeLineCap(svg::StrokeLineCap::ROUND)
                 .SetStrokeLineJoin(svg::StrokeLineJoin::ROUND)
                 ;
-        //std::cerr<<"Route "s<<r->name()<<" color is "s<< settings_.color_palette[color_index]<<std::endl;
         ++color_index;
         if (color_index == (int)settings_.color_palette.size()) {
             color_index = 0;
@@ -86,7 +85,7 @@ std::string map_renderer::render() const {
                 ;
         svg_document.Add(route_label);
 
-        if (!r->isCycled() && r->stops().size()>1 && *(r->stops().begin()) != (*r->stops().rbegin())) {
+        if (!r->isCycled() && r->stops().size()>1 && (*r->stops().begin() != *r->stops().rbegin())) {
             svg::Text stop_label_underlayer = svg::Text()
                     .SetPosition(scaler((*r->stops().rbegin())->place()))
                     .SetOffset(settings_.bus_label_offset)
