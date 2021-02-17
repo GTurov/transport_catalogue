@@ -142,7 +142,7 @@ void json_reader::process_queries(std::istream& in, std::ostream& out) {
     for (const Node& n: stat_requests.AsArray()) {
         request r;
         r.id = n.AsMap().at("id"s).AsInt();
-        if(n.AsMap().at("type"s).AsString() == "Stop") {
+        if (n.AsMap().at("type"s).AsString() == "Stop") {
             r.type = request_type::REQUEST_STOP;
             r.name = n.AsMap().at("name"s).AsString();
         } else if (n.AsMap().at("type"s).AsString() == "Bus") {

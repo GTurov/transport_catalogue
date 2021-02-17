@@ -55,7 +55,7 @@ void Catalogue::addStop(Stop* stop) {
     }
 }
 
-void Catalogue::addStop(const std::string_view name, geo::Coordinates place) {
+void Catalogue::addStop(const std::string_view name, const geo::Coordinates &place) {
     auto* stop = new Stop(name, place);
     //std::cout<<*stop<<std::endl; // debug
     addStop(stop);
@@ -80,7 +80,7 @@ void Catalogue::addRoute(Route* route) {
         stop_to_buses_[stop].insert(route);
     }
 }
-void Catalogue::addRoute(const std::string_view name, std::vector<Stop*> stops, bool cycled) {
+void Catalogue::addRoute(const std::string_view name, const std::vector<Stop *>& stops, bool cycled) {
     auto* route = new Route(name, stops, cycled);
     //std::cout<<*route<<std::endl; // debug
     addRoute(route);

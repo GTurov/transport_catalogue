@@ -19,7 +19,6 @@ struct renderSettings {
 
     int bus_label_font_size = 0;
     svg::Point bus_label_offset = {0,0};
-    // point
 
     int stop_label_font_size = 0;
     svg::Point stop_label_offset = {0,0};
@@ -82,7 +81,7 @@ public:
     bool IsZero(double value) { return std::abs(value) < 1e-6;}
 
     svg::Point operator()(geo::Coordinates coords) const {
-        return { (coords.lng - min_lon_) * zoom_coeff_ + padding_,
+        return {(coords.lng - min_lon_) * zoom_coeff_ + padding_,
                 (max_lat_ - coords.lat) * zoom_coeff_ + padding_ };
     }
 
@@ -94,8 +93,7 @@ private:
 };
 
 
-class map_renderer
-{
+class map_renderer {
 public:
     map_renderer(transport::Catalogue& catalogue, const renderSettings& settings)
         :catalogue_(catalogue), settings_(settings) {}

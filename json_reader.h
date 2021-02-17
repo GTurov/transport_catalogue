@@ -29,8 +29,7 @@ struct stopAnswer {
     std::string error = "";
 };
 
-class json_reader
-{
+class json_reader {
 public:
     json_reader(transport::Catalogue& catalogue)
         :catalogue_(catalogue) {}

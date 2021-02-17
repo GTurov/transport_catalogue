@@ -29,14 +29,12 @@ struct Point {
  */
 struct RenderContext {
     RenderContext(std::ostream& out)
-        : out(out) {
-    }
+        : out(out) {}
 
     RenderContext(std::ostream& out, int indent_step, int indent = 0)
         : out(out)
         , indent_step(indent_step)
-        , indent(indent) {
-    }
+        , indent(indent) {}
 
     RenderContext Indented() const {
         return {out, indent_step, indent + indent_step};
@@ -122,7 +120,7 @@ inline std::ostream& operator<<(std::ostream& out, Rgb color) {
 struct Rgba {
     Rgba() = default;
     Rgba(uint8_t red, uint8_t green, uint8_t blue, double opacity)
-        :red(red), green(green), blue(blue), opacity(opacity){}
+        :red(red), green(green), blue(blue), opacity(opacity) {}
     uint8_t red = 0;
     uint8_t green = 0;
     uint8_t blue = 0;
@@ -141,7 +139,6 @@ using Color = std::variant<std::monostate, std::string, Rgb, Rgba>;
 // мы сделаем так, чтобы она была одной на все единицы трансляции,
 // которые подключают этот заголовок.
 // В противном случае каждая единица трансляции будет использовать свою копию этой константы
-//inline const Color NoneColor{"none"};
 inline const Color NoneColor {};
 
 struct OstreamColorPrinter {
@@ -161,8 +158,6 @@ struct OstreamColorPrinter {
 };
 
 inline std::ostream& operator<<(std::ostream& out, Color color) {
-    //std::visit(OstreamColorPrinter{out}, color);
-
     if (std::holds_alternative<std::monostate>(color)) {
         out << "none"sv;
     } else if (std::holds_alternative<std::string>(color)) {

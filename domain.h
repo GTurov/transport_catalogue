@@ -22,7 +22,7 @@ public:
     }
     const std::string& name() const {return name_;}
     const std::vector<Stop*>& stops() const {return stops_;}
-    bool isCycled() const{return isCycled_;}
+    bool isCycled() const {return isCycled_;}
     int stopsCount() const {return (isCycled_?stops_.size():stops_.size()*2-1);}
     int uniqueStopCount() const {return uniqueStopCount_;}
     int length() const {return length_;}
@@ -49,7 +49,7 @@ namespace detail {
 
 template <class ObjectWithName>
 struct ObjectWithNameComparator {
-    bool operator() (const ObjectWithName* lhs, const ObjectWithName* rhs)const {
+    bool operator()(const ObjectWithName* lhs, const ObjectWithName* rhs) const {
         return std::lexicographical_compare(
                     lhs->name().begin(), lhs->name().end(),
                     rhs->name().begin(), rhs->name().end());
@@ -70,7 +70,7 @@ using RouteSet = detail::ObjectWithNameSet<Route>;
 class Stop {
 public:
     Stop(const std::string_view name, const geo::Coordinates place)
-        :name_(name), place_(place)  {}
+        :name_(name), place_(place) {}
     const geo::Coordinates place() const {return place_;}
     const std::string& name() const {return name_;}
     struct Info {
