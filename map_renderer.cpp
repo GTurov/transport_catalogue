@@ -39,7 +39,7 @@ std::string map_renderer::render() const {
                 ;
         //std::cerr<<"Route "s<<r->name()<<" color is "s<< settings_.color_palette[color_index]<<std::endl;
         ++color_index;
-        if(color_index == (int)settings_.color_palette.size()) {
+        if (color_index == (int)settings_.color_palette.size()) {
             color_index = 0;
         }
         for (auto it = r->stops().begin(); it != r->stops().end(); ++it) {
@@ -86,7 +86,7 @@ std::string map_renderer::render() const {
                 ;
         svg_document.Add(route_label);
 
-        if (!r->isCycled() && r->stops().size()>1) {
+        if (!r->isCycled() && r->stops().size()>1 && *(r->stops().begin()) != (*r->stops().rbegin())) {
             svg::Text stop_label_underlayer = svg::Text()
                     .SetPosition(scaler((*r->stops().rbegin())->place()))
                     .SetOffset(settings_.bus_label_offset)
@@ -114,7 +114,7 @@ std::string map_renderer::render() const {
             svg_document.Add(stop_label);
         }
         ++color_index;
-        if(color_index == (int)settings_.color_palette.size()) {
+        if (color_index == (int)settings_.color_palette.size()) {
             color_index = 0;
         }
     }

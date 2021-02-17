@@ -87,7 +87,6 @@ Text& Text::SetData(std::string data) {
 void Text::RenderObject(const RenderContext& context) const {
     auto& out = context.out;
     out << "<text";
-    RenderAttrs(context.out);
     out << " x=\""sv << position_.x << "\" y=\""sv << position_.y << "\""sv;
     out << " dx=\""sv << offset_.x << "\" dy=\""sv << offset_.y << "\""sv;
     out << " font-size=\""sv << font_size_ << "\"";
@@ -97,6 +96,7 @@ void Text::RenderObject(const RenderContext& context) const {
     if (font_weight_.size() != 0 && font_weight_ != "normal"sv) {
         out << " font-weight=\""sv << font_weight_ << "\""sv;
     }
+    RenderAttrs(context.out);
     out << ">"sv;
     for (char c: data_) {
         switch (c) {

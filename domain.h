@@ -59,17 +59,11 @@ struct ObjectWithNameComparator {
 template <class ObjectWithName>
 using ObjectWithNameSet = std::set<ObjectWithName*, detail::ObjectWithNameComparator<ObjectWithName>>;
 
-struct RouteComparator {
-    bool operator() (const Route* lhs, const Route* rhs)const ;
-};
-
 } // detail
 
 std::ostream& operator<<(std::ostream& out, const Route& route);
 
 std::ostream& operator<<(std::ostream& out, const Route::Info& route);
-
-//using RouteSet = std::set<Route*, detail::RouteComparator>;
 
 using RouteSet = detail::ObjectWithNameSet<Route>;
 
@@ -89,19 +83,10 @@ private:
     geo::Coordinates place_;
 };
 
-namespace detail {
-
-struct StopComparator {
-    bool operator() (const Stop* lhs, const Stop* rhs)const ;
-};
-
-} // detail
-
 std::ostream& operator<<(std::ostream& out, const Stop& stop);
 
 std::ostream& operator<<(std::ostream& out, const Stop::Info& stop);
 
-//using StopSet = std::set<Stop*, detail::StopComparator>;
 using StopSet = detail::ObjectWithNameSet<Stop>;
 
 } // transport

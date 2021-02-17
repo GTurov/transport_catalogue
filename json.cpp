@@ -393,7 +393,7 @@ struct VariantPrinter {
     void operator()(Array array) const {
         out << "["sv ;
         bool first = true;
-        for(Node& n: array) {
+        for (Node& n: array) {
             if (first) {
                 first = false;
             } else {
@@ -406,7 +406,7 @@ struct VariantPrinter {
     void operator()(Dict map) const {
         out << "{"sv ;
         bool first = true;
-        for(auto& [key, value]: map) {
+        for (auto& [key, value]: map) {
             if (first) {
                 first = false;
             } else {
@@ -449,16 +449,7 @@ ostream& operator<<(ostream& out, const Data& d) {
 }
 
 void Print(const Document& doc, std::ostream& output) {
-//    (void) &doc;
-//    (void) &output;
-    //cout<<"Print";
-    //output<<"null";
     visit(VariantPrinter{output}, doc.GetRoot().Content());
-
-    //output << doc.GetRoot().Content();
-
-
-    // Реализуйте функцию самостоятельно
 }
 
 }  // namespace json

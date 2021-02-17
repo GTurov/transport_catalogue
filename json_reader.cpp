@@ -21,19 +21,13 @@ json::Node makeRouteAnswer(int request_id, const transport::Route::Info& data) {
 
 svg::Color nodeToColor(const json::Node& n) {
     if (n.IsString()) {
-        //std::cout<<"String"s<<n.AsString()<<std::endl;
         return svg::Color(n.AsString());
     }
     if (n.IsArray()) {
-        //std::cout<<"Array "s;
         if (n.AsArray().size() == 3) {
             uint8_t red = n.AsArray()[0].AsInt();
             uint8_t green = n.AsArray()[1].AsInt();
             uint8_t blue = n.AsArray()[2].AsInt();
-//            std::cout<<"rgb "s<<n.AsArray()[0].AsInt()<<" "s
-//                    <<n.AsArray()[1].AsInt()<<" "s
-//                   <<n.AsArray()[2].AsInt()<<" "s
-//                  <<std::endl;
             return svg::Color(svg::Rgb(red,green,blue));
         }
 
@@ -42,11 +36,6 @@ svg::Color nodeToColor(const json::Node& n) {
             uint8_t green = n.AsArray()[1].AsInt();
             uint8_t blue = n.AsArray()[2].AsInt();
             double opacity = n.AsArray()[3].AsDouble();
-//            std::cout<<"rgba "s<<n.AsArray()[0].AsInt()<<" "s
-//                    <<n.AsArray()[1].AsInt()<<" "s
-//                   <<n.AsArray()[2].AsInt()<<" "s
-//                     <<n.AsArray()[3].AsDouble()<<" "s
-//                  <<std::endl;
             return svg::Color(svg::Rgba(red,green,blue,opacity));
         }
     }
@@ -59,19 +48,16 @@ void json_reader::process_queries(std::istream& in, std::ostream& out) {
     const Document raw_requests = json::Load(in);
 
     const Node& base_requests = raw_requests.GetRoot().AsMap().at("base_requests");
-    //out<<"Base:\n"s<<base_requests.Content()<<std::endl;
 
     std::vector<const Node*> stop_nodes;
     std::vector<const Node*> bus_nodes;
 
     for (const Node& n: base_requests.AsArray()) {
         if (n.AsMap().at("type"s).AsString() == "Stop"s) {
-            //out<<"stop "<<n.AsMap().at("name"s).AsString()<<std::endl;
             stop_nodes.push_back(&n);
             continue;
         }
         if (n.AsMap().at("type"s).AsString() == "Bus"s) {
-            //out<<"bus "<<n.AsMap().at("name"s).AsString()<<std::endl;
             bus_nodes.push_back(&n);
             continue;
         }
@@ -91,16 +77,13 @@ void json_reader::process_queries(std::istream& in, std::ostream& out) {
         double latitude  = n->AsMap().at("latitude"s).AsDouble();
         double longitude  = n->AsMap().at("longitude"s).AsDouble();
         catalogue_.addStop(name, {latitude, longitude});
-        //out<<"stop added("<<n->AsMap().at("road_distances"s).AsMap().size()<<")\n"s;
         for(const std::pair<std::string, Node>& d: n->AsMap().at("road_distances"s).AsMap()) {
             distances.push_back({name,d.first,d.second.AsInt()});
         }
-        //out<<*catalogue_.stop(name)<<std::endl;
     }
 
     // Distances
     for (const distance& d: distances) {
-        //out<<d.from<<" -> "s <<d.to<<" "<<d.meters<<" meters"<<std::endl;
         catalogue_.setDistance(d.from, d.to, d.meters);
     }
 
@@ -118,48 +101,35 @@ void json_reader::process_queries(std::istream& in, std::ostream& out) {
             }
         }
         catalogue_.addRoute(name, std::move(stops), isCycled);
-        //out<<*catalogue_.route(name)<<std::endl;
     }
 
     // Render settings
     if (raw_requests.GetRoot().AsMap().find("render_settings") != raw_requests.GetRoot().AsMap().end()) {
         const Dict& render_settings = raw_requests.GetRoot().AsMap().at("render_settings"s).AsMap();
         rs_.width = render_settings.at("width"s).AsDouble();
-        //std::cerr<<rs.width<<std::endl;
         rs_.height = render_settings.at("height"s).AsDouble();
-        //std::cerr<<rs.height<<std::endl;
 
         rs_.padding = render_settings.at("padding"s).AsDouble();
-        //std::cerr<<rs.padding<<std::endl;
         rs_.line_width = render_settings.at("line_width"s).AsDouble();
-        //std::cerr<<rs.line_width<<std::endl;
         rs_.stop_radius = render_settings.at("stop_radius"s).AsDouble();
-        //std::cerr<<rs.stop_radius<<std::endl;
 
         rs_.bus_label_font_size = render_settings.at("bus_label_font_size"s).AsInt();
-        //std::cerr<<rs.bus_label_font_size<<std::endl;
         Array raw_bus_label_offset = render_settings.at("bus_label_offset"s).AsArray();
         rs_.bus_label_offset.x = raw_bus_label_offset[0].AsDouble();
         rs_.bus_label_offset.y = raw_bus_label_offset[1].AsDouble();
-        //std::cout << rs.bus_label_offset[0] << " "s << rs.bus_label_offset[1]<<std::endl;
 
 
         rs_.stop_label_font_size = render_settings.at("stop_label_font_size"s).AsInt();
-        //std::cerr<<rs.stop_label_font_size<<std::endl;
         Array raw_stop_label_offset = render_settings.at("stop_label_offset"s).AsArray();
         rs_.stop_label_offset.x = raw_stop_label_offset[0].AsDouble();
         rs_.stop_label_offset.y = raw_stop_label_offset[1].AsDouble();
-        //std::cout << rs.stop_label_offset[0] << " "s << rs.stop_label_offset[1]<<std::endl;
 
 
         rs_.underlayer_color = nodeToColor(render_settings.at("underlayer_color"s));
-        //std::cerr<<rs.underlayer_color<<std::endl;
         rs_.underlayer_width = render_settings.at("underlayer_width"s).AsDouble();
-        //std::cerr<<rs.underlayer_width<<std::endl;
 
         for (const Node& n: render_settings.at("color_palette"s).AsArray()) {
             rs_.color_palette.push_back(nodeToColor(n));
-            //std::cerr<<nodeToColor(n)<<std::endl;
         }
     }
     map_renderer renderer(catalogue_, rs_);
@@ -167,7 +137,6 @@ void json_reader::process_queries(std::istream& in, std::ostream& out) {
 
     // Requests
     const Node& stat_requests = raw_requests.GetRoot().AsMap().at("stat_requests");
-    //out<<"Stat:\n"s<<stat_requests.Content();
 
     std::vector<request> pure_requests;
     for (const Node& n: stat_requests.AsArray()) {
@@ -176,16 +145,15 @@ void json_reader::process_queries(std::istream& in, std::ostream& out) {
         if(n.AsMap().at("type"s).AsString() == "Stop") {
             r.type = request_type::REQUEST_STOP;
             r.name = n.AsMap().at("name"s).AsString();
-        } else if(n.AsMap().at("type"s).AsString() == "Bus") {
+        } else if (n.AsMap().at("type"s).AsString() == "Bus") {
             r.type = request_type::REQUEST_BUS;
             r.name = n.AsMap().at("name"s).AsString();
-        } else if(n.AsMap().at("type"s).AsString() == "Map") {
+        } else if (n.AsMap().at("type"s).AsString() == "Map") {
             r.type = request_type::REQUEST_MAP;
         } else {
             throw json::ParsingError("Stat request type parsing error"s);
         }
         pure_requests.push_back(r);
-        //throw json::ParsingError("Stat request parsing error"s);
     }
 
     // Process requests
@@ -193,7 +161,6 @@ void json_reader::process_queries(std::istream& in, std::ostream& out) {
     for (const request& r: pure_requests) {
         switch (r.type) {
         case request_type::REQUEST_STOP: {
-            //std::cerr<<r.name<<std::endl;
             if (auto stop_info = catalogue_.stopInfo(r.name); stop_info) {
                 answers.push_back(makeStopAnswer(r.id, *stop_info));
             } else {
@@ -214,9 +181,5 @@ void json_reader::process_queries(std::istream& in, std::ostream& out) {
             throw std::exception();
         }
     }
-
     out << answers;
-
-
-    //out<<requests.GetRoot().Content();
 }

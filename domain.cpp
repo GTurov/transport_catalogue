@@ -16,12 +16,6 @@ Route::Route(const std::string_view name, const std::vector<Stop *>& stops, bool
     uniqueStopCount_ = std::unordered_set<Stop*>(stops.begin(), stops.end()).size();
 }
 
-bool detail::RouteComparator::operator() (const Route* lhs, const Route* rhs) const {
-    return std::lexicographical_compare(
-                lhs->name().begin(), lhs->name().end(),
-                rhs->name().begin(), rhs->name().end());
-}
-
 std::ostream& operator<<(std::ostream& out, const Route& route) {
     out << "Bus "s << route.name() <<": "s;
     bool firstStop = true;
@@ -44,12 +38,6 @@ std::ostream& operator<<(std::ostream& out, const Route::Info& route) {
         out << "not found"s;
     }
     return out;
-}
-
-bool detail::StopComparator::operator() (const Stop* lhs, const Stop* rhs) const {
-    return std::lexicographical_compare(
-                lhs->name().begin(), lhs->name().end(),
-                rhs->name().begin(), rhs->name().end());
 }
 
 std::ostream& operator<<(std::ostream& out, const Stop& stop) {

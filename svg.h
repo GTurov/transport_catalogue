@@ -73,7 +73,6 @@ public:
     template <typename Obj>
     void Add(Obj obj) {
         AddPtr(std::make_unique<Obj>(std::move(obj)));
-        // make_shared
     }
 
     virtual void AddPtr(std::unique_ptr<Object>&& obj) = 0;
