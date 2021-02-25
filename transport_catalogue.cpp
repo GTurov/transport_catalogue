@@ -27,7 +27,7 @@ size_t detail::StopNameHasher::operator() (const std::string_view text) const {
     return sum*text.size();
 }
 
-size_t detail::StopPairHasher::operator() (const std::pair<Stop*,Stop*> stops) const {
+size_t detail::StopPairHasher::operator() (const std::pair<Stop*,Stop*>& stops) const {
     // Будем считать, что для x64 вероятность совпадения "хвостов" адресов невелика :)
     return ((((size_t)stops.first<<16)&0xFFFF0000) | ((size_t)stops.second&0x0000FFFF));
 }

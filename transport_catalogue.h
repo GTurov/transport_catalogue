@@ -21,7 +21,7 @@ struct StopNameHasher {
 };
 
 struct StopPairHasher {
-    size_t operator()(const std::pair<Stop*,Stop*> stops) const;
+    size_t operator()(const std::pair<Stop*,Stop*>& stops) const;
 };
 
 } // detail
@@ -33,7 +33,7 @@ public:
     void addStop(Stop* stop);
     void addStop(const std::string_view name, const geo::Coordinates& place);
     void addRoute(Route* route);
-    void addRoute(const std::string_view name, const std::vector<Stop *>& stops, bool cycled = false);
+    void addRoute(const std::string_view name, const std::vector<Stop*>& stops, bool cycled = false);
     void setDistance(Stop* first, Stop* second, int meters);
     void setDistance(const std::string_view first, const std::string_view second, int meters);
     std::optional<Route*> route(const std::string_view name) const;
