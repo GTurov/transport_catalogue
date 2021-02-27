@@ -33,11 +33,11 @@ struct RenderContext {
 
     RenderContext(std::ostream& out, int indent_step, int indent = 0)
         : out(out)
-        , indent_step(indent_step)
+        , indentStep(indent_step)
         , indent(indent) {}
 
     RenderContext Indented() const {
-        return {out, indent_step, indent + indent_step};
+        return {out, indentStep, indent + indentStep};
     }
 
     void RenderIndent() const {
@@ -47,7 +47,7 @@ struct RenderContext {
     }
 
     std::ostream& out;
-    int indent_step = 0;
+    int indentStep = 0;
     int indent = 0;
 };
 
@@ -227,23 +227,23 @@ template <typename Owner>
 class PathProps {
 public:
     Owner& SetFillColor(Color color) {
-        fill_color_ = std::move(color);
+        fillColor_ = std::move(color);
         return AsOwner();
     }
     Owner& SetStrokeColor(Color color) {
-        stroke_color_ = std::move(color);
+        strokeColor_ = std::move(color);
         return AsOwner();
     }
     Owner& SetStrokeWidth(double width) {
-        stroke_width_ = width;
+        strokeWidth_ = width;
         return AsOwner();
     }
     Owner& SetStrokeLineCap(StrokeLineCap line_cap) {
-        stroke_line_cap_ = line_cap;
+        strokeLineCap_ = line_cap;
         return AsOwner();
     }
     Owner& SetStrokeLineJoin(StrokeLineJoin line_join) {
-        stroke_line_join_ = line_join;
+        strokeLineJoin_ = line_join;
         return AsOwner();
     }
 
@@ -253,20 +253,20 @@ protected:
     void RenderAttrs(std::ostream& out) const {
         using namespace std::literals;
 
-        if (fill_color_) {
-            out << " fill=\""sv << *fill_color_ << "\""sv;
+        if (fillColor_) {
+            out << " fill=\""sv << *fillColor_ << "\""sv;
         }
-        if (stroke_color_) {
-            out << " stroke=\""sv << *stroke_color_ << "\""sv;
+        if (strokeColor_) {
+            out << " stroke=\""sv << *strokeColor_ << "\""sv;
         }
-        if (stroke_width_) {
-            out << " stroke-width=\""sv << *stroke_width_ << "\""sv;
+        if (strokeWidth_) {
+            out << " stroke-width=\""sv << *strokeWidth_ << "\""sv;
         }
-        if (stroke_line_cap_) {
-            out << " stroke-linecap=\""sv << *stroke_line_cap_ << "\""sv;
+        if (strokeLineCap_) {
+            out << " stroke-linecap=\""sv << *strokeLineCap_ << "\""sv;
         }
-        if (stroke_line_join_) {
-            out << " stroke-linejoin=\""sv << *stroke_line_join_ << "\""sv;
+        if (strokeLineJoin_) {
+            out << " stroke-linejoin=\""sv << *strokeLineJoin_ << "\""sv;
         }
     }
 
@@ -276,11 +276,11 @@ private:
         // если класс Owner - наследник PathProps
         return static_cast<Owner&>(*this);
     }
-    std::optional<Color> fill_color_;
-    std::optional<Color> stroke_color_;
-    std::optional<double> stroke_width_;
-    std::optional<StrokeLineCap> stroke_line_cap_;
-    std::optional<StrokeLineJoin> stroke_line_join_;
+    std::optional<Color> fillColor_;
+    std::optional<Color> strokeColor_;
+    std::optional<double> strokeWidth_;
+    std::optional<StrokeLineCap> strokeLineCap_;
+    std::optional<StrokeLineJoin> strokeLineJoin_;
 };
 
 
@@ -344,9 +344,9 @@ private:
 
     Point position_ = {0,0};
     Point offset_ = {0,0};
-    uint32_t font_size_ = 1;
-    std::string font_family_;
-    std::string font_weight_;
+    uint32_t fontSize_ = 1;
+    std::string fontFamily_;
+    std::string fontWeight_;
     std::string data_;
 };
 

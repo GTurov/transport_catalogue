@@ -29,11 +29,11 @@ struct stopAnswer {
     std::string error = "";
 };
 
-class json_reader {
+class JsonReader {
 public:
-    json_reader(transport::Catalogue& catalogue)
+    JsonReader(transport::Catalogue& catalogue)
         :catalogue_(catalogue) {}
-    void process_queries(std::istream& in = std::cin, std::ostream& out = std::cout);
+    void processQueries(std::istream& in = std::cin, std::ostream& out = std::cout);
 
 private:
     transport::Catalogue& catalogue_;

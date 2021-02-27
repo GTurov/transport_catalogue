@@ -49,10 +49,10 @@ public:
 private:
     std::deque<Stop*> stops_;
     std::deque<Route*> routes_;
-    std::unordered_map<std::string_view, Route*, detail::RouteNumberHasher> name_to_bus_;
-    std::unordered_map<std::string_view, Stop*, detail::StopNameHasher> name_to_stop_;
-    std::unordered_map<Stop*, RouteSet> stop_to_buses_;
-    std::unordered_map<std::pair<Stop*,Stop*>, int, detail::StopPairHasher> stops_to_distances_;
+    std::unordered_map<std::string_view, Route*, detail::RouteNumberHasher> nameToBus_;
+    std::unordered_map<std::string_view, Stop*, detail::StopNameHasher> nameToStop_;
+    std::unordered_map<Stop*, RouteSet> stopToBuses_;
+    std::unordered_map<std::pair<Stop*,Stop*>, int, detail::StopPairHasher> stopsToDistances_;
 };
 
 } // transport

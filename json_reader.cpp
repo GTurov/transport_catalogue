@@ -24,25 +24,22 @@ svg::Color nodeToColor(const json::Node& n) {
         return svg::Color(n.AsString());
     }
     if (n.IsArray()) {
-        if (n.AsArray().size() == 3) {
-            uint8_t red = n.AsArray()[0].AsInt();
-            uint8_t green = n.AsArray()[1].AsInt();
-            uint8_t blue = n.AsArray()[2].AsInt();
-            return svg::Color(svg::Rgb(red,green,blue));
+        const json::Array& color = n.AsArray();
+        if (color.size() == 3) {
+            return svg::Color(
+                        svg::Rgb(color[0].AsInt(),color[1].AsInt(),color[2].AsInt()));
         }
 
-        if (n.AsArray().size() == 4) {
-            uint8_t red = n.AsArray()[0].AsInt();
-            uint8_t green = n.AsArray()[1].AsInt();
-            uint8_t blue = n.AsArray()[2].AsInt();
-            double opacity = n.AsArray()[3].AsDouble();
-            return svg::Color(svg::Rgba(red,green,blue,opacity));
+        if (color.size() == 4) {
+            return svg::Color(
+                        svg::Rgba(color[0].AsInt(),color[1].AsInt(),color[2].AsInt(),
+                    color[3].AsDouble()));
         }
     }
     throw std::exception();
 }
 
-void json_reader::process_queries(std::istream& in, std::ostream& out) {
+void JsonReader::processQueries(std::istream& in, std::ostream& out) {
     using namespace json;
 
     const Document raw_requests = json::Load(in);
@@ -77,7 +74,7 @@ void json_reader::process_queries(std::istream& in, std::ostream& out) {
         double latitude  = n->AsMap().at("latitude"s).AsDouble();
         double longitude  = n->AsMap().at("longitude"s).AsDouble();
         catalogue_.addStop(name, {latitude, longitude});
-        for(const std::pair<std::string, Node>& d: n->AsMap().at("road_distances"s).AsMap()) {
+        for(const auto& d: n->AsMap().at("road_distances"s).AsMap()) {
             distances.push_back({name,d.first,d.second.AsInt()});
         }
     }
@@ -110,29 +107,29 @@ void json_reader::process_queries(std::istream& in, std::ostream& out) {
         rs_.height = render_settings.at("height"s).AsDouble();
 
         rs_.padding = render_settings.at("padding"s).AsDouble();
-        rs_.line_width = render_settings.at("line_width"s).AsDouble();
-        rs_.stop_radius = render_settings.at("stop_radius"s).AsDouble();
+        rs_.lineWidth = render_settings.at("line_width"s).AsDouble();
+        rs_.stopRadius = render_settings.at("stop_radius"s).AsDouble();
 
-        rs_.bus_label_font_size = render_settings.at("bus_label_font_size"s).AsInt();
+        rs_.busLabelFontSize = render_settings.at("bus_label_font_size"s).AsInt();
         Array raw_bus_label_offset = render_settings.at("bus_label_offset"s).AsArray();
-        rs_.bus_label_offset.x = raw_bus_label_offset[0].AsDouble();
-        rs_.bus_label_offset.y = raw_bus_label_offset[1].AsDouble();
+        rs_.busLabelOffset.x = raw_bus_label_offset[0].AsDouble();
+        rs_.busLabelOffset.y = raw_bus_label_offset[1].AsDouble();
 
 
-        rs_.stop_label_font_size = render_settings.at("stop_label_font_size"s).AsInt();
+        rs_.stopLabelFontSize = render_settings.at("stop_label_font_size"s).AsInt();
         Array raw_stop_label_offset = render_settings.at("stop_label_offset"s).AsArray();
-        rs_.stop_label_offset.x = raw_stop_label_offset[0].AsDouble();
-        rs_.stop_label_offset.y = raw_stop_label_offset[1].AsDouble();
+        rs_.stopLabelOffset.x = raw_stop_label_offset[0].AsDouble();
+        rs_.stopLabelOffset.y = raw_stop_label_offset[1].AsDouble();
 
 
-        rs_.underlayer_color = nodeToColor(render_settings.at("underlayer_color"s));
-        rs_.underlayer_width = render_settings.at("underlayer_width"s).AsDouble();
+        rs_.underlayerColor = nodeToColor(render_settings.at("underlayer_color"s));
+        rs_.underlayerWidth = render_settings.at("underlayer_width"s).AsDouble();
 
         for (const Node& n: render_settings.at("color_palette"s).AsArray()) {
-            rs_.color_palette.push_back(nodeToColor(n));
+            rs_.colorPalette.push_back(nodeToColor(n));
         }
     }
-    map_renderer renderer(catalogue_, rs_);
+    MapRenderer renderer(catalogue_, rs_);
 
 
     // Requests

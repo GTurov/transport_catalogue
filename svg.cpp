@@ -66,17 +66,17 @@ Text& Text::SetOffset(Point offset) {
 }
 
 Text& Text::SetFontSize(uint32_t size) {
-    font_size_ = size;
+    fontSize_ = size;
     return *this;
 }
 
 Text& Text::SetFontFamily(std::string font_family) {
-    font_family_ = font_family;
+    fontFamily_ = font_family;
     return *this;
 }
 
 Text& Text::SetFontWeight(std::string font_weight) {
-    font_weight_ = font_weight;
+    fontWeight_ = font_weight;
     return *this;
 }
 
@@ -89,12 +89,12 @@ void Text::RenderObject(const RenderContext& context) const {
     out << "<text";
     out << " x=\""sv << position_.x << "\" y=\""sv << position_.y << "\""sv;
     out << " dx=\""sv << offset_.x << "\" dy=\""sv << offset_.y << "\""sv;
-    out << " font-size=\""sv << font_size_ << "\"";
-    if (font_family_.size() != 0) {
-        out << " font-family=\""sv << font_family_ << "\""sv;
+    out << " font-size=\""sv << fontSize_ << "\"";
+    if (fontFamily_.size() != 0) {
+        out << " font-family=\""sv << fontFamily_ << "\""sv;
     }
-    if (font_weight_.size() != 0 && font_weight_ != "normal"sv) {
-        out << " font-weight=\""sv << font_weight_ << "\""sv;
+    if (fontWeight_.size() != 0 && fontWeight_ != "normal"sv) {
+        out << " font-weight=\""sv << fontWeight_ << "\""sv;
     }
     RenderAttrs(context.out);
     out << ">"sv;

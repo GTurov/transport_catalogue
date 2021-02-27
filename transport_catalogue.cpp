@@ -33,10 +33,10 @@ size_t detail::StopPairHasher::operator() (const std::pair<Stop*,Stop*>& stops) 
 }
 
 Catalogue::~Catalogue() {
-    name_to_bus_.clear();
-    name_to_stop_.clear();
-    stop_to_buses_.clear();
-    stops_to_distances_.clear();
+    nameToBus_.clear();
+    nameToStop_.clear();
+    stopToBuses_.clear();
+    stopsToDistances_.clear();
     while (!routes_.empty()) {
         delete routes_.back();
         routes_.pop_back();
@@ -49,9 +49,9 @@ Catalogue::~Catalogue() {
 
 void Catalogue::addStop(Stop* stop) {
     stops_.push_back(stop);
-    name_to_stop_[stop->name()] = stop;
-    if (stop_to_buses_.find(stop) == stop_to_buses_.end()) {
-        stop_to_buses_[stop] = {};
+    nameToStop_[stop->name()] = stop;
+    if (stopToBuses_.find(stop) == stopToBuses_.end()) {
+        stopToBuses_[stop] = {};
     }
 }
 
@@ -63,7 +63,7 @@ void Catalogue::addStop(const std::string_view name, const geo::Coordinates &pla
 
 void Catalogue::addRoute(Route* route) {
     routes_.push_back(route);
-    name_to_bus_[route->name()] = route;
+    nameToBus_[route->name()] = route;
     int length_ = 0;
     for (int i = 0; i < (int)route->stops().size()-1; ++i) {
         length_ += distanceBetween(route->stops()[i],route->stops()[i+1]);
@@ -77,7 +77,7 @@ void Catalogue::addRoute(Route* route) {
     }
     route->setLength(length_);
     for (auto * stop: route->stops()) {
-        stop_to_buses_[stop].insert(route);
+        stopToBuses_[stop].insert(route);
     }
 }
 void Catalogue::addRoute(const std::string_view name, const std::vector<Stop *>& stops, bool cycled) {
@@ -88,46 +88,46 @@ void Catalogue::addRoute(const std::string_view name, const std::vector<Stop *>&
 
 void Catalogue::setDistance(Stop* first, Stop* second, int meters) {
     if ((first!= nullptr) && (second != nullptr)) {
-        stops_to_distances_[{first, second}] = meters;
+        stopsToDistances_[{first, second}] = meters;
     } else {
         throw std::invalid_argument("Invalid stop"s);
     }
 }
 
 void Catalogue::setDistance(const std::string_view first, const std::string_view second, int meters) {
-    if ((name_to_stop_.find(first) == name_to_stop_.end()) || (name_to_stop_.find(second) == name_to_stop_.end())) {
+    if ((nameToStop_.find(first) == nameToStop_.end()) || (nameToStop_.find(second) == nameToStop_.end())) {
         throw std::invalid_argument("Invalid stop"s);
     }
-    setDistance(name_to_stop_[first], name_to_stop_[second], meters);
+    setDistance(nameToStop_[first], nameToStop_[second], meters);
 }
 
 std::optional<Route*> Catalogue::route(const std::string_view name) const {
-    if (name_to_bus_.find(name) == name_to_bus_.end()) {
+    if (nameToBus_.find(name) == nameToBus_.end()) {
         return std::nullopt;
     };
-    return name_to_bus_.at(name);
+    return nameToBus_.at(name);
 }
 std::optional<Stop*> Catalogue::stop(const std::string_view name) const {
-    if (name_to_stop_.find(name) == name_to_stop_.end()) {
+    if (nameToStop_.find(name) == nameToStop_.end()) {
         return std::nullopt;
     };
-    return name_to_stop_.at(name);
+    return nameToStop_.at(name);
 }
 
 const RouteSet Catalogue::routesViaStop(const std::string_view name) const {
-    if (stop_to_buses_.find(name_to_stop_.at(name)) == stop_to_buses_.end()) {
+    if (stopToBuses_.find(nameToStop_.at(name)) == stopToBuses_.end()) {
         return {};
     };
-    return stop_to_buses_.at(name_to_stop_.at(name));
+    return stopToBuses_.at(nameToStop_.at(name));
 }
 
 std::optional<const Route::Info> Catalogue::routeInfo(const std::string_view name) const {
-    if (name_to_bus_.find(name) == name_to_bus_.end()) {
+    if (nameToBus_.find(name) == nameToBus_.end()) {
         return std::nullopt;
     };
     Route::Info result;
     result.name = name;
-    Route * route = name_to_bus_.at(name);
+    Route * route = nameToBus_.at(name);
     result.stopCount = route->stopsCount();
     result.uniqueStopCount = route->uniqueStopCount();
     result.length = route->length();
@@ -136,21 +136,21 @@ std::optional<const Route::Info> Catalogue::routeInfo(const std::string_view nam
 }
 
 std::optional<const Stop::Info> Catalogue::stopInfo(const std::string_view name) const {
-    if (name_to_stop_.find(name) == name_to_stop_.end()) {
+    if (nameToStop_.find(name) == nameToStop_.end()) {
         return std::nullopt;
     }
     Stop::Info result;
     result.name = name;
-    result.routes = stop_to_buses_.at(name_to_stop_.at(name));
+    result.routes = stopToBuses_.at(nameToStop_.at(name));
     return result;
 }
 
 int Catalogue::distanceBetween(Stop* first, Stop* second) const {
     if ((first!= nullptr) && (second != nullptr)) {
-        if (stops_to_distances_.find({first, second}) != stops_to_distances_.end()) {
-            return stops_to_distances_.at({first, second});
-        } else if (stops_to_distances_.find({second, first}) != stops_to_distances_.end()) {
-            return stops_to_distances_.at({second, first});
+        if (stopsToDistances_.find({first, second}) != stopsToDistances_.end()) {
+            return stopsToDistances_.at({first, second});
+        } else if (stopsToDistances_.find({second, first}) != stopsToDistances_.end()) {
+            return stopsToDistances_.at({second, first});
         } else if (first == second) {
             return 0;
         } else {
@@ -161,10 +161,10 @@ int Catalogue::distanceBetween(Stop* first, Stop* second) const {
     }
 }
 int Catalogue::distanceBetween(const std::string_view first, const std::string_view second) const {
-    if ((name_to_stop_.find(first) == name_to_stop_.end()) || (name_to_stop_.find(second) == name_to_stop_.end())) {
+    if ((nameToStop_.find(first) == nameToStop_.end()) || (nameToStop_.find(second) == nameToStop_.end())) {
         throw std::invalid_argument("Invalid stop"s);
     }
-    return distanceBetween(name_to_stop_.at(first), name_to_stop_.at(second));
+    return distanceBetween(nameToStop_.at(first), nameToStop_.at(second));
 }
 
 }
