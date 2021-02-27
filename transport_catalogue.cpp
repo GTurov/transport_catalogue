@@ -1,7 +1,5 @@
 #include "transport_catalogue.h"
 
-#include "domain.h"
-
 //#include <iomanip>
 //#include <iostream>
 #include <stdexcept>

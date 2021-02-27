@@ -1,6 +1,7 @@
 #pragma once
 
-#include "domain.h"
+#include "route.h"
+#include "stop.h"
 
 #include <deque>
 #include <optional>

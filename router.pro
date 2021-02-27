@@ -4,24 +4,26 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 SOURCES += \
-        domain.cpp \
         json.cpp \
         json_reader.cpp \
         main.cpp \
         map_renderer.cpp \
         request_handler.cpp \
+        route.cpp \
         stat_reader.cpp \
+        stop.cpp \
         svg.cpp \
         transport_catalogue.cpp
 
 HEADERS += \
-    domain.h \
     geo.h \
     json.h \
     json_reader.h \
     map_renderer.h \
     request_handler.h \
+    route.h \
     stat_reader.h \
+    stop.h \
     svg.h \
     transport_catalogue.h
 
