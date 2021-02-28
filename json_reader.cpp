@@ -1,22 +1,38 @@
 #include "json_reader.h"
 
+#include "json_builder.h"
+
 #include <vector>
 #include <optional>
 
 using namespace std::literals;
 
 json::Node makeStopAnswer(int request_id, const transport::Stop::Info& data) {
-    json::Array routes;
+    json::Builder builder;
+    builder.StartArray();
     for (transport::Route* r: data.routes) {
-        routes.push_back(json::Node(r->name()));
+        builder.Value(r->name());
     }
-    return json::Node(json::Dict{{"request_id"s,request_id},{"buses",std::move(routes)}});
+    json::Node x = builder.EndArray().Build();
+    return json::Builder{}
+            .StartDict()
+            .Key("request_id"s).Value(request_id)
+            .Key("buses"s).Value(x.AsArray())
+            .EndDict().Build();
 }
 
 json::Node makeRouteAnswer(int request_id, const transport::Route::Info& data) {
-    return json::Node(json::Dict{{"request_id"s,request_id},{"route_length",data.length},
-                                 {"stop_count"s, data.stopCount},{"unique_stop_count"s,data.uniqueStopCount},
-                                 {"curvature"s,data.curvature}});
+    return json::Builder{}
+    .StartDict()
+    .Key("request_id"s).Value(request_id)
+    .Key("route_length"s).Value(data.length)
+    .Key("stop_count"s).Value(data.stopCount)
+    .Key("unique_stop_count"s).Value(data.uniqueStopCount)
+    .Key("curvature"s).Value(data.curvature)
+    .EndDict()
+    .Build()
+    ;
+
 }
 
 svg::Color nodeToColor(const json::Node& n) {
@@ -44,17 +60,17 @@ void JsonReader::processQueries(std::istream& in, std::ostream& out) {
 
     const Document raw_requests = json::Load(in);
 
-    const Node& base_requests = raw_requests.GetRoot().AsMap().at("base_requests");
+    const Node& base_requests = raw_requests.GetRoot().AsDict().at("base_requests");
 
     std::vector<const Node*> stop_nodes;
     std::vector<const Node*> bus_nodes;
 
     for (const Node& n: base_requests.AsArray()) {
-        if (n.AsMap().at("type"s).AsString() == "Stop"s) {
+        if (n.AsDict().at("type"s).AsString() == "Stop"s) {
             stop_nodes.push_back(&n);
             continue;
         }
-        if (n.AsMap().at("type"s).AsString() == "Bus"s) {
+        if (n.AsDict().at("type"s).AsString() == "Bus"s) {
             bus_nodes.push_back(&n);
             continue;
         }
@@ -70,11 +86,11 @@ void JsonReader::processQueries(std::istream& in, std::ostream& out) {
 
     // Stops
     for (const Node* n: stop_nodes) {
-        std::string name = n->AsMap().at("name"s).AsString();
-        double latitude  = n->AsMap().at("latitude"s).AsDouble();
-        double longitude  = n->AsMap().at("longitude"s).AsDouble();
+        std::string name = n->AsDict().at("name"s).AsString();
+        double latitude  = n->AsDict().at("latitude"s).AsDouble();
+        double longitude  = n->AsDict().at("longitude"s).AsDouble();
         catalogue_.addStop(name, {latitude, longitude});
-        for(const auto& d: n->AsMap().at("road_distances"s).AsMap()) {
+        for(const auto& d: n->AsDict().at("road_distances"s).AsDict()) {
             distances.push_back({name,d.first,d.second.AsInt()});
         }
     }
@@ -87,10 +103,10 @@ void JsonReader::processQueries(std::istream& in, std::ostream& out) {
 
     // Routes
     for (const Node* n: bus_nodes) {
-        std::string name = n->AsMap().at("name"s).AsString();
-        bool isCycled = n->AsMap().at("is_roundtrip"s).AsBool();
+        std::string name = n->AsDict().at("name"s).AsString();
+        bool isCycled = n->AsDict().at("is_roundtrip"s).AsBool();
         std::vector<transport::Stop*> stops;
-        for (const Node& n: n->AsMap().at("stops"s).AsArray()) {
+        for (const Node& n: n->AsDict().at("stops"s).AsArray()) {
             if (auto stop = catalogue_.stop(n.AsString()); stop) {
                 stops.push_back(*stop);
             } else {
@@ -101,8 +117,8 @@ void JsonReader::processQueries(std::istream& in, std::ostream& out) {
     }
 
     // Render settings
-    if (raw_requests.GetRoot().AsMap().find("render_settings") != raw_requests.GetRoot().AsMap().end()) {
-        const Dict& render_settings = raw_requests.GetRoot().AsMap().at("render_settings"s).AsMap();
+    if (raw_requests.GetRoot().AsDict().find("render_settings") != raw_requests.GetRoot().AsDict().end()) {
+        const Dict& render_settings = raw_requests.GetRoot().AsDict().at("render_settings"s).AsDict();
         rs_.width = render_settings.at("width"s).AsDouble();
         rs_.height = render_settings.at("height"s).AsDouble();
 
@@ -133,19 +149,19 @@ void JsonReader::processQueries(std::istream& in, std::ostream& out) {
 
 
     // Requests
-    const Node& stat_requests = raw_requests.GetRoot().AsMap().at("stat_requests");
+    const Node& stat_requests = raw_requests.GetRoot().AsDict().at("stat_requests");
 
     std::vector<request> pure_requests;
     for (const Node& n: stat_requests.AsArray()) {
         request r;
-        r.id = n.AsMap().at("id"s).AsInt();
-        if (n.AsMap().at("type"s).AsString() == "Stop") {
+        r.id = n.AsDict().at("id"s).AsInt();
+        if (n.AsDict().at("type"s).AsString() == "Stop") {
             r.type = request_type::REQUEST_STOP;
-            r.name = n.AsMap().at("name"s).AsString();
-        } else if (n.AsMap().at("type"s).AsString() == "Bus") {
+            r.name = n.AsDict().at("name"s).AsString();
+        } else if (n.AsDict().at("type"s).AsString() == "Bus") {
             r.type = request_type::REQUEST_BUS;
-            r.name = n.AsMap().at("name"s).AsString();
-        } else if (n.AsMap().at("type"s).AsString() == "Map") {
+            r.name = n.AsDict().at("name"s).AsString();
+        } else if (n.AsDict().at("type"s).AsString() == "Map") {
             r.type = request_type::REQUEST_MAP;
         } else {
             throw json::ParsingError("Stat request type parsing error"s);
@@ -154,29 +170,52 @@ void JsonReader::processQueries(std::istream& in, std::ostream& out) {
     }
 
     // Process requests
-    Array answers;
+    json::Builder answers;
+    answers.StartArray();
     for (const request& r: pure_requests) {
         switch (r.type) {
         case request_type::REQUEST_STOP: {
             if (auto stop_info = catalogue_.stopInfo(r.name); stop_info) {
-                answers.push_back(makeStopAnswer(r.id, *stop_info));
+                answers.Value(makeStopAnswer(r.id, *stop_info).AsDict());
             } else {
-                answers.push_back(Node(Dict{{"request_id"s,r.id},{"error_message"s, "not found"s}}));
+                answers.Value(
+                json::Builder{}
+                            .StartDict()
+                            .Key("request_id"s).Value(r.id)
+                            .Key("error_message"s).Value("not found"s)
+                            .EndDict()
+                            .Build().AsDict()
+                            );
             }
         } break;
         case request_type::REQUEST_BUS: {
             if (auto route_info = catalogue_.routeInfo(r.name); route_info) {
-                answers.push_back(makeRouteAnswer(r.id, *route_info));
+                answers.Value(makeRouteAnswer(r.id, *route_info).AsDict());
             } else {
-                answers.push_back(Node(Dict{{"request_id"s,r.id},{"error_message"s, "not found"s}}));
+                answers.Value(
+                json::Builder{}
+                            .StartDict()
+                            .Key("request_id"s).Value(r.id)
+                            .Key("error_message"s).Value("not found"s)
+                            .EndDict()
+                            .Build().AsDict()
+                            );
             }
         } break;
         case request_type::REQUEST_MAP: {
-            answers.push_back(Node(Dict{{"request_id"s,r.id},{"map",renderer.render()}}));
+            answers.Value(
+            json::Builder{}
+                        .StartDict()
+                        .Key("request_id"s).Value(r.id)
+                        .Key("map"s).Value(renderer.render())
+                        .EndDict()
+                        .Build().AsDict()
+                        );
         } break;
         default:
             throw std::exception();
         }
     }
-    out << answers;
+    answers.EndArray();
+    out << answers.Build();
 }

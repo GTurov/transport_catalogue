@@ -8,5 +8,6 @@ int main()
     Catalogue catalogue;
     JsonReader jreader(catalogue);
     jreader.processQueries();
+
     return 0;
 }

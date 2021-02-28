@@ -319,7 +319,7 @@ const Array& Node::AsArray() const {
     }
 }
 
-const Dict& Node::AsMap() const {
+const Dict& Node::AsDict() const {
     if (std::holds_alternative<Dict>(data_)) {
         return get<Dict>(data_);
     } else {
@@ -355,7 +355,7 @@ bool Node::IsArray() const {
     return std::holds_alternative<Array>(data_);
 }
 
-bool Node::IsMap() const {
+bool Node::IsDict() const {
     return std::holds_alternative<Dict>(data_);
 }
 
@@ -370,6 +370,11 @@ bool Node::operator!=(const Node &other) const {
 
 Data Node::Content() const {
     return data_;
+}
+
+std::ostream& operator<<(std::ostream& out, const Node& d) {
+    out << d.Content();
+    return out;
 }
 
 Document::Document(Node root)

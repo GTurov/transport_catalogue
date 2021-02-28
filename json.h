@@ -39,7 +39,7 @@ public:
     double AsDouble() const;
     const std::string& AsString() const;
     const Array& AsArray() const;
-    const Dict& AsMap() const;
+    const Dict& AsDict() const;
 
     bool IsNull() const;
     bool IsBool() const;
@@ -48,7 +48,7 @@ public:
     bool IsPureDouble() const;
     bool IsString() const;
     bool IsArray() const;
-    bool IsMap() const;
+    bool IsDict() const;
 
     bool operator==(const Node& other) const;
     bool operator!=(const Node& other) const;
@@ -58,6 +58,8 @@ public:
 private:
     Data data_;
 };
+
+std::ostream& operator<<(std::ostream& out, const Node& d);
 
 class Document {
 public:
