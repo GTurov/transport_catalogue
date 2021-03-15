@@ -148,6 +148,14 @@ void JsonReader::processQueries(std::istream& in, std::ostream& out) {
     MapRenderer renderer(catalogue_, rs_);
 
 
+    // Routing settings
+    if (raw_requests.GetRoot().AsDict().find("routing_settings") != raw_requests.GetRoot().AsDict().end()) {
+        const Dict& render_settings = raw_requests.GetRoot().AsDict().at("routing_settings"s).AsDict();
+        rrs_.bus_wait_time = render_settings.at("bus_wait_time"s).AsInt();
+        rrs_.bus_velocity = render_settings.at("bus_velocity"s).AsDouble();
+    }
+    transport::RouteFinder navigator(catalogue_, rrs_.bus_wait_time, rrs_.bus_velocity);
+
     // Requests
     const Node& stat_requests = raw_requests.GetRoot().AsDict().at("stat_requests");
 
@@ -156,25 +164,32 @@ void JsonReader::processQueries(std::istream& in, std::ostream& out) {
         request r;
         r.id = n.AsDict().at("id"s).AsInt();
         if (n.AsDict().at("type"s).AsString() == "Stop") {
-            r.type = request_type::REQUEST_STOP;
+            r.type = REQUEST_TYPE::STOP;
             r.name = n.AsDict().at("name"s).AsString();
         } else if (n.AsDict().at("type"s).AsString() == "Bus") {
-            r.type = request_type::REQUEST_BUS;
+            r.type = REQUEST_TYPE::BUS;
             r.name = n.AsDict().at("name"s).AsString();
         } else if (n.AsDict().at("type"s).AsString() == "Map") {
-            r.type = request_type::REQUEST_MAP;
+            r.type = REQUEST_TYPE::MAP;
+        }else if (n.AsDict().at("type"s).AsString() == "Route") {
+            r.type = REQUEST_TYPE::ROUTE;
+            r.from = n.AsDict().at("from"s).AsString();
+            r.to = n.AsDict().at("to"s).AsString();
         } else {
             throw json::ParsingError("Stat request type parsing error"s);
         }
         pure_requests.push_back(r);
     }
 
+    //-------------------------------------------------
+    return;
+
     // Process requests
     json::Builder answers;
     answers.StartArray();
     for (const request& r: pure_requests) {
         switch (r.type) {
-        case request_type::REQUEST_STOP: {
+        case REQUEST_TYPE::STOP: {
             if (auto stop_info = catalogue_.stopInfo(r.name); stop_info) {
                 answers.Value(makeStopAnswer(r.id, *stop_info).AsDict());
             } else {
@@ -188,7 +203,7 @@ void JsonReader::processQueries(std::istream& in, std::ostream& out) {
                             );
             }
         } break;
-        case request_type::REQUEST_BUS: {
+        case REQUEST_TYPE::BUS: {
             if (auto route_info = catalogue_.routeInfo(r.name); route_info) {
                 answers.Value(makeRouteAnswer(r.id, *route_info).AsDict());
             } else {
@@ -202,15 +217,19 @@ void JsonReader::processQueries(std::istream& in, std::ostream& out) {
                             );
             }
         } break;
-        case request_type::REQUEST_MAP: {
+        case REQUEST_TYPE::MAP: {
             answers.Value(
             json::Builder{}
                         .StartDict()
                         .Key("request_id"s).Value(r.id)
-                        .Key("map"s).Value(renderer.render())
+                        .Key("total_time"s).Value(0)
+                        .Key("items"s).Value(renderer.render())
                         .EndDict()
                         .Build().AsDict()
                         );
+        } break;
+        case REQUEST_TYPE::ROUTE: {
+            std::cerr << "-----Surprise mazafucka!!---\n"s;
         } break;
         default:
             throw std::exception();

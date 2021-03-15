@@ -1,11 +1,14 @@
 #pragma once
 
+
 #include "json.h"
 #include "map_renderer.h"
 #include "svg.h"
 #include "transport_catalogue.h"
+#include "transport_router.h"
 
 #include <iostream>
+#include <optional>
 #include <string>
 
 json::Node makeStopAnswer(int request_id, const transport::Stop::Info& data);
@@ -13,20 +16,21 @@ json::Node makeRouteAnswer(int request_id, const transport::Route::Info& data);
 
 svg::Color nodeToColor(const json::Node& n);
 
-enum class request_type {
-    REQUEST_STOP, REQUEST_BUS, REQUEST_MAP
+struct RoutingSettings {
+    int bus_wait_time;
+    double bus_velocity;
+};
+
+enum class REQUEST_TYPE {
+    STOP, BUS, MAP, ROUTE
 };
 
 struct request {
     int id;
-    request_type type;
+    REQUEST_TYPE type;
     std::string name;
-};
-
-struct stopAnswer {
-    int id = 0;
-    transport::Stop::Info answer;
-    std::string error = "";
+    std::string from;
+    std::string to;
 };
 
 class JsonReader {
@@ -38,5 +42,6 @@ public:
 private:
     transport::Catalogue& catalogue_;
     renderSettings rs_;
+    RoutingSettings rrs_;
 };
 
