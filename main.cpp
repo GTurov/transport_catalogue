@@ -38,21 +38,40 @@ using namespace transport;
 
 int main()
 {
-    std::ifstream l("out.json");
-    json::Node lhs = json::Load(l).GetRoot();
+//    std::ifstream l("out.json");
+//    json::Node lhs = json::Load(l).GetRoot();
 
-    std::ifstream r("out.json");
-    json::Node rhs = json::Load(r).GetRoot();
+//    std::ifstream r("e4_output.json");
+//    json::Node rhs = json::Load(r).GetRoot();
 
-    //std::cerr<<lhs.GetRoot().AsArray().size();
-    assert(lhs.AsArray().size() == rhs.AsArray().size());
+//    //std::cerr<<lhs.GetRoot().AsArray().size();
+//    assert(lhs.AsArray().size() == rhs.AsArray().size());
 
-    for (int i = 0; i < (int)lhs.AsArray().size(); ++i) {
+//    const json::Array& left = lhs.AsArray();
+//    const json::Array& right = rhs.AsArray();
+//    for (int i = 0; i < (int)lhs.AsArray().size(); ++i) {
+//        if (left[i].AsDict().find("total_time"s) != left[i].AsDict().end()) {
+//            if (std::abs(
+//                        left[i].AsDict().at("total_time"s).AsDouble() -
+//                        right[i].AsDict().at("total_time"s).AsDouble()
+//                        ) > left[i].AsDict().at("total_time"s).AsDouble()/10000) {
+////                std::cout<<std::abs(
+////                               left[i].AsDict().at("total_time"s).AsDouble() -
+////                               right[i].AsDict().at("total_time"s).AsDouble()
+////                               ) << " "s << left[i].AsDict().at("total_time"s).AsDouble()/10000
+////                        << std::endl;
+//                std::cout<<left[i]<<std::endl;
+//                std::cout<<right[i]<<std::endl<<std::endl;
+//            }
+//        } else {
+//            if (left[i] != right[i]) {
+//                std::cout<<left[i]<<std::endl;
+//                std::cout<<right[i]<<std::endl<<std::endl;
+//            }
+//        }
+//    }
 
-    }
 
-
-    for
 
 
 

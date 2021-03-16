@@ -56,6 +56,15 @@
             "name": "Prazhskaya",
             "road_distances": {},
             "type": "Stop"
+        },
+        {
+            "latitude": 55,
+            "longitude": 37,
+            "name": "Huyazhskaya",
+            "road_distances": {
+
+            },
+            "type": "Stop"
         }
     ],
     "render_settings": {
@@ -122,6 +131,19 @@
             "id": 5,
             "to": "Prazhskaya",
             "type": "Route"
+        },
+        {
+            "from": "Prazhskaya",
+            "id": 6,
+            "to": "Prazhskaya",
+            "type": "Route"
+        },
+        {
+            "from": "Prazhskaya",
+            "id": 7,
+            "to": "Huyazhskaya",
+            "type": "Route"
         }
+
     ]
 }

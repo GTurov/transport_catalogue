@@ -53,43 +53,80 @@ RouteFinder::RouteFinder(Catalogue& catalogue, int bus_wait_time , double bus_ve
       bus_wait_time_(bus_wait_time*60),
       bus_velocity_(bus_velocity/3.6) {
     // Все остановки будут вершинами графа. Добавим их в словарь для быстрого поиска вершины по названию.
-    for (auto* stop: catalogue_.allStops()) {
+    auto allStops = catalogue_.allStops();
+    // Создаём сам граф с нужным количеством вершин
+    graph_ = std::make_unique<NavigationGraph>(allStops.size());
+    for (auto* stop: allStops) {
         graphVertexes_.push_back(stop);
         stopToGraphVertex_.insert({stop,graphVertexes_.size()-1});
+//        // podskazka
+        if (catalogue.routesViaStop(stop->name()).size() == 0) {
+            TripItem item{stop, stop, nullptr, {0,0,0}};
+            int id = graph_->AddEdge(graph::Edge<GraphWeight>{graphVertexes_.size()-1,
+                                                              graphVertexes_.size()-1, {item.spending}});
+//            int id = graph_->AddEdge(graph::Edge<GraphWeight>{stopToGraphVertex_[item.from],
+//                                                              stopToGraphVertex_[item.to], item.spending});
+            graphEdges_.push_back(std::move(item));
+            if (id != (int)graphEdges_.size()-1) {
+                throw std::exception();
+            }
+        }
     }
-    // Создаём сам граф с нужным количеством вершин
-    graph_ = std::make_unique<NavigationGraph>(graphVertexes_.size());
 
     for (auto* route: catalogue_.allRoutes()) {
         DistanceFinder df(catalogue,route);
         const auto& stops = route->stops();
         //std::cerr<< "Route " << route->name() <<std::endl;
-        if (route->isCycled()) {
-            for (int i = 0; i+1 < (int)stops.size(); ++i) {
-                for (int j = i+1; j < (int)stops.size(); ++j) {
-                    TripItem item{stops[i], stops[j], route, {abs(i-j), static_cast<double>(bus_wait_time_), df.distanceBetween(i,j)/bus_velocity_}};
-                    //std::cerr<<"Eblo "<<item << ", "s<<df.distanceBetween(i,j)<<" m"<<std::endl;
-                    int id = graph_->AddEdge(graph::Edge<GraphWeight>{stopToGraphVertex_[item.from],
-                                                       stopToGraphVertex_[item.to], item.spending});
-                    graphEdges_.push_back(std::move(item));
-                    if (id != (int)graphEdges_.size()-1) {
-                        throw std::exception();
-                    }
-                }
-            }
-        } else {
-            for (int i = 0; i < (int)stops.size(); ++i) {
-                for (int j = 0; j < (int)stops.size(); ++j) {
-                    if (i != j) {
-                        TripItem item{stops[i], stops[j], route, {abs(i-j), static_cast<double>(bus_wait_time_), df.distanceBetween(i,j)/bus_velocity_}};
-                        ///std::cerr<<"Eblo "<<item << ", "s<<df.distanceBetween(i,j)<<" m"<<std::endl;
-                        int id = graph_->AddEdge(graph::Edge<GraphWeight>{stopToGraphVertex_[item.from],
-                                                           stopToGraphVertex_[item.to], item.spending});
-                        graphEdges_.push_back(std::move(item));
-                        if (id != (int)graphEdges_.size()-1) {
-                            throw std::exception();
-                        }
-                    }
+//        if (route->isCycled()) {
+//            for (int i = 0; i+1 < (int)stops.size(); ++i) {
+//                for (int j = i+1; j < (int)stops.size(); ++j) {
+//                    TripItem item{stops[i], stops[j], route, {abs(i-j), static_cast<double>(bus_wait_time_), df.distanceBetween(i,j)/bus_velocity_}};
+//                    //std::cerr<<"Eblo "<<item << ", "s<<df.distanceBetween(i,j)<<" m"<<std::endl;
+//                    int id = graph_->AddEdge(graph::Edge<GraphWeight>{stopToGraphVertex_[item.from],
+//                                                       stopToGraphVertex_[item.to], item.spending});
+//                    graphEdges_.push_back(std::move(item));
+//                    if (id != (int)graphEdges_.size()-1) {
+//                        throw std::exception();
+//                    }
+//                }
+//            }
+//        } else {
+//            for (int i = 0; i < (int)stops.size(); ++i) {
+//                for (int j = 0; j < (int)stops.size(); ++j) {
+//                    if (i != j) {
+//                        TripItem item{stops[i], stops[j], route, {abs(i-j), static_cast<double>(bus_wait_time_), df.distanceBetween(i,j)/bus_velocity_}};
+//                        ///std::cerr<<"Eblo "<<item << ", "s<<df.distanceBetween(i,j)<<" m"<<std::endl;
+//                        int id = graph_->AddEdge(graph::Edge<GraphWeight>{stopToGraphVertex_[item.from],
+//                                                           stopToGraphVertex_[item.to], item.spending});
+//                        graphEdges_.push_back(std::move(item));
+//                        if (id != (int)graphEdges_.size()-1) {
+//                            throw std::exception();
+//                        }
+//                    }
+//                }
+//            }
+//        }
+        for (int i = 0; i+1 < (int)stops.size(); ++i) {
+            for (int j = i+1; j < (int)stops.size(); ++j) {
+//                TripItem item{stops[i], stops[j], route, {abs(i-j), static_cast<double>(bus_wait_time_), df.distanceBetween(i,j)/bus_velocity_}};
+//                //std::cerr<<"Eblo "<<item << ", "s<<df.distanceBetween(i,j)<<" m"<<std::endl;
+//                int id = graph_->AddEdge(graph::Edge<GraphWeight>{stopToGraphVertex_[item.from],
+//                                                                  stopToGraphVertex_[item.to], item.spending});
+//                graphEdges_.push_back(std::move(item));
+//                if (id != (int)graphEdges_.size()-1) {
+//                    throw std::exception();
+//                }
+                addTripItem(stops[i], stops[j], route, {abs(i-j), static_cast<double>(bus_wait_time_), df.distanceBetween(i,j)/bus_velocity_});
+                if (!route->isCycled()) {
+                    //TripItem item{stops[j], stops[i], route, {abs(i-j), static_cast<double>(bus_wait_time_), df.distanceBetween(j,i)/bus_velocity_}};
+                    addTripItem(stops[j], stops[i], route, {abs(i-j), static_cast<double>(bus_wait_time_), df.distanceBetween(j,i)/bus_velocity_});
+//                    //std::cerr<<"Eblo "<<item << ", "s<<df.distanceBetween(i,j)<<" m"<<std::endl;
+//                    int id = graph_->AddEdge(graph::Edge<GraphWeight>{stopToGraphVertex_[item.from],
+//                                                                      stopToGraphVertex_[item.to], item.spending});
+//                    graphEdges_.push_back(std::move(item));
+//                    if (id != (int)graphEdges_.size()-1) {
+//                        throw std::exception();
+//                    }
                 }
             }
         }
@@ -121,7 +158,18 @@ std::optional<std::vector<TripItem>> RouteFinder::findRoute(std::string_view fro
     }
     //std::cerr << std::endl << std::endl;
 
-    return std::move(result);
+    return result;
+}
+
+void RouteFinder::addTripItem(Stop* from, Stop* to, Route* route, const TripSpending& spending) {
+    TripItem item{from, to, route, std::move(spending)};
+    //std::cerr<<"Eblo "<<item << ", "s<<df.distanceBetween(i,j)<<" m"<<std::endl;
+    int id = graph_->AddEdge(graph::Edge<GraphWeight>{stopToGraphVertex_[item.from],
+                                                      stopToGraphVertex_[item.to], item.spending});
+    graphEdges_.push_back(std::move(item));
+    if (id != (int)graphEdges_.size()-1) {
+        throw std::exception();
+    }
 }
 
 } // namespace transport

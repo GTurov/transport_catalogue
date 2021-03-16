@@ -53,8 +53,9 @@ public:
     std::optional<std::vector<TripItem>> findRoute(std::string_view from, std::string_view to);
 
 private:
-    std::optional<graph::Router<double>::RouteInfo> buildRoute(std::string_view from,
-                                                               std::string_view to);
+    //std::optional<graph::Router<double>::RouteInfo> buildRoute(std::string_view from,
+    //                                                           std::string_view to);
+    void addTripItem(Stop* from, Stop* to, Route* route, const TripSpending& spending);
 
 private:
     Catalogue& catalogue_;
