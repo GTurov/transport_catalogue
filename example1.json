@@ -143,6 +143,12 @@
             "id": 7,
             "to": "Huyazhskaya",
             "type": "Route"
+        },
+        {
+            "from": "Huyazhskaya",
+            "id": 8,
+            "to": "Huyazhskaya",
+            "type": "Route"
         }
 
     ]
