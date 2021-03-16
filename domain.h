@@ -18,7 +18,7 @@ public:
               bool cycled = false);
     void setLength(int meters) {
         length_ = meters;
-        curvature_ = (double) length_ / directLength_;
+        curvature_ = directLength_==0?1:(double) length_ / directLength_;
     }
     const std::string& name() const {return name_;}
     const std::vector<Stop*>& stops() const {return stops_;}

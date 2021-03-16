@@ -13,6 +13,7 @@
 
 json::Node makeStopAnswer(int request_id, const transport::Stop::Info& data);
 json::Node makeRouteAnswer(int request_id, const transport::Route::Info& data);
+json::Node makePathAnswer(int request_id, const std::vector<transport::TripItem>& data);
 
 svg::Color nodeToColor(const json::Node& n);
 

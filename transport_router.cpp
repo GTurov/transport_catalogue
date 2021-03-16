@@ -3,6 +3,28 @@
 namespace transport {
 
 
+TripSpending operator+ (const TripSpending& lhs, const TripSpending& rhs) {
+    return {lhs.stopCount + rhs.stopCount,
+                lhs.waitTime + rhs.waitTime,
+                lhs.tripTime + rhs.tripTime};
+}
+
+bool operator< (const TripSpending& lhs, const TripSpending& rhs) {
+    return (lhs.waitTime + lhs.tripTime < rhs.waitTime + rhs.tripTime);
+}
+
+bool operator> (const TripSpending& lhs, const TripSpending& rhs) {
+    return (lhs.waitTime + lhs.tripTime > rhs.waitTime + rhs.tripTime);
+}
+
+std::ostream& operator<<(std::ostream& out, const TripItem& item) {
+    out << item.from->name() << " -> "s << item.to->name()
+        << " by bus " << item.bus->name() << " : " << item.spending.stopCount << " stops, "
+        << item.spending.waitTime / 60 << " min wait time "
+        << item.spending.tripTime / 60 << " min trip time";
+    return out;
+}
+
 DistanceFinder::DistanceFinder(Catalogue& catalogue, const Route* route)
     : direct_distances_(route->stops().size(),0),
       reverse_distances_(route->stops().size(),0)
@@ -28,31 +50,78 @@ int DistanceFinder::distanceBetween(int fromStopIndex, int toStopIndex) {
 
 RouteFinder::RouteFinder(Catalogue& catalogue, int bus_wait_time , double bus_velocity)
     : catalogue_(catalogue),
-      bus_wait_time_(bus_wait_time),
+      bus_wait_time_(bus_wait_time*60),
       bus_velocity_(bus_velocity/3.6) {
     // Все остановки будут вершинами графа. Добавим их в словарь для быстрого поиска вершины по названию.
     for (auto* stop: catalogue_.allStops()) {
         graphVertexes_.push_back(stop);
-        stopToGraphVertex_.insert({stop->name(),graphVertexes_.size()-1});
+        stopToGraphVertex_.insert({stop,graphVertexes_.size()-1});
     }
+    // Создаём сам граф с нужным количеством вершин
+    graph_ = std::make_unique<NavigationGraph>(graphVertexes_.size());
 
     for (auto* route: catalogue_.allRoutes()) {
         DistanceFinder df(catalogue,route);
         const auto& stops = route->stops();
+        //std::cerr<< "Route " << route->name() <<std::endl;
         if (route->isCycled()) {
-
+            for (int i = 0; i+1 < (int)stops.size(); ++i) {
+                for (int j = i+1; j < (int)stops.size(); ++j) {
+                    TripItem item{stops[i], stops[j], route, {abs(i-j), static_cast<double>(bus_wait_time_), df.distanceBetween(i,j)/bus_velocity_}};
+                    //std::cerr<<"Eblo "<<item << ", "s<<df.distanceBetween(i,j)<<" m"<<std::endl;
+                    int id = graph_->AddEdge(graph::Edge<GraphWeight>{stopToGraphVertex_[item.from],
+                                                       stopToGraphVertex_[item.to], item.spending});
+                    graphEdges_.push_back(std::move(item));
+                    if (id != (int)graphEdges_.size()-1) {
+                        throw std::exception();
+                    }
+                }
+            }
         } else {
             for (int i = 0; i < (int)stops.size(); ++i) {
                 for (int j = 0; j < (int)stops.size(); ++j) {
                     if (i != j) {
-                        TripItem item{stops[i], stops[j], abs(i-j), df.distanceBetween(i,j)/bus_velocity_};
-                        std::cerr<<"Eblo "<<item << ", "s<<df.distanceBetween(i,j)<<" m"<<std::endl;
+                        TripItem item{stops[i], stops[j], route, {abs(i-j), static_cast<double>(bus_wait_time_), df.distanceBetween(i,j)/bus_velocity_}};
+                        ///std::cerr<<"Eblo "<<item << ", "s<<df.distanceBetween(i,j)<<" m"<<std::endl;
+                        int id = graph_->AddEdge(graph::Edge<GraphWeight>{stopToGraphVertex_[item.from],
+                                                           stopToGraphVertex_[item.to], item.spending});
+                        graphEdges_.push_back(std::move(item));
+                        if (id != (int)graphEdges_.size()-1) {
+                            throw std::exception();
+                        }
                     }
                 }
             }
         }
     }
+    router_ = std::make_unique<graph::Router<GraphWeight>>(*graph_);
+}
 
+std::optional<std::vector<TripItem>> RouteFinder::findRoute(std::string_view from, std::string_view to) {
+    //std::cerr<<"Find route from "s << from << " to "s << to << std::endl;
+    auto stopFrom = catalogue_.stop(from);
+    auto stopTo = catalogue_.stop(to);
+    if (!stopFrom.has_value() || !stopTo.has_value()) {
+        return std::nullopt;
+    }
+    graph::VertexId fromVertexId = stopToGraphVertex_.at(stopFrom.value());
+    graph::VertexId toVertexId = stopToGraphVertex_.at(stopTo.value());
+    auto route = router_->BuildRoute(fromVertexId, toVertexId);
+    if (!route.has_value()) {
+        //std::cerr << "Route not found\n";
+        return std::nullopt;
+    }
+
+    //std::cerr << "Route found:" << (route.value().weight.waitTime + route.value().weight.tripTime) / 60 << " min trip time:\n";
+
+    std::vector<TripItem> result;
+    for (const auto& edge: route.value().edges) {
+        //std::cerr << graphEdges_.at(edge) << std::endl;
+        result.push_back(graphEdges_.at(edge));
+    }
+    //std::cerr << std::endl << std::endl;
+
+    return std::move(result);
 }
 
 } // namespace transport

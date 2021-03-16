@@ -372,10 +372,7 @@ Data Node::Content() const {
     return data_;
 }
 
-std::ostream& operator<<(std::ostream& out, const Node& d) {
-    out << d.Content();
-    return out;
-}
+
 
 Document::Document(Node root)
     : root_(move(root)) {
@@ -389,72 +386,118 @@ Document Load(istream& input) {
     return Document{LoadNode(input)};
 }
 
-struct VariantPrinter {
-    ostream& out;
+struct PrintContext {
+    std::ostream& out;
+    int indent_step = 4;
+    int indent = 0;
 
-    void operator()(std::nullptr_t) const {
-        out << "null"sv;
-    }
-    void operator()(Array array) const {
-        out << "["sv ;
-        bool first = true;
-        for (Node& n: array) {
-            if (first) {
-                first = false;
-            } else {
-                out <<',';
-            }
-            out << n.Content();
+    void PrintIndent() const {
+        for (int i = 0; i < indent; ++i) {
+            out.put(' ');
         }
-        out << "]"sv ;
-    }
-    void operator()(Dict map) const {
-        out << "{"sv ;
-        bool first = true;
-        for (auto& [key, value]: map) {
-            if (first) {
-                first = false;
-            } else {
-                out <<',';
-            }
-            out << "\""sv<<key << "\":"sv<<value.Content();
-        }
-        out << "}"sv ;
-    }
-    void operator()(bool value) const {
-        out << (value?"true"sv:"false"sv);
-    }
-    void operator()(int value) const {
-        out << value;
-    }
-    void operator()(double value) const {
-        out << value;
-    }
-    void operator()(std::string value) const {
-        out<<"\""sv;
-        for (char c: value) {
-            switch (c) {
-            case '"': out<<"\\\""sv; break;
-            case '\n': out<<"\\n"sv; break;
-            case '\r': out<<"\\r"sv; break;
-            case '\\': out<<"\\\\"sv; break;
-            case '\t': out<<"\\t"sv; break;
-            default:
-                out<<c;
-            }
-        }
-        out<<"\""sv;
     }
 
+    PrintContext Indented() const {
+        return {out, indent_step, indent_step + indent};
+    }
 };
 
-ostream& operator<<(ostream& out, const Data& d) {
-    visit(VariantPrinter{out}, d);
+void PrintNode(const Node& value, const PrintContext& ctx);
+
+template <typename Value>
+void PrintValue(const Value& value, const PrintContext& ctx) {
+    ctx.out << value;
+}
+
+void PrintString(const string& value, std::ostream& out) {
+    out<<"\""sv;
+    for (char c: value) {
+        switch (c) {
+        case '"': out<<"\\\""sv; break;
+        case '\n': out<<"\\n"sv; break;
+        case '\r': out<<"\\r"sv; break;
+        case '\\': out<<"\\\\"sv; break;
+        case '\t': out<<"\\t"sv; break;
+        default:
+            out<<c;
+        }
+    }
+    out<<"\""sv;
+}
+
+template <>
+void PrintValue<std::string>(const std::string& value, const PrintContext& ctx) {
+    PrintString(value, ctx.out);
+}
+
+template <>
+void PrintValue<std::nullptr_t>(const std::nullptr_t&, const PrintContext& ctx) {
+    ctx.out << "null"sv;
+}
+
+template <>
+void PrintValue<bool>(const bool& value, const PrintContext& ctx) {
+    ctx.out << (value ? "true"sv : "false"sv);
+}
+
+template <>
+void PrintValue<Array>(const Array& nodes, const PrintContext& ctx) {
+    std::ostream& out = ctx.out;
+    out << "[\n"sv;
+    bool first = true;
+    auto inner_ctx = ctx.Indented();
+    for (const Node& node : nodes) {
+        if (first) {
+            first = false;
+        } else {
+            out << ",\n"sv;
+        }
+        inner_ctx.PrintIndent();
+        PrintNode(node, inner_ctx);
+    }
+    out.put('\n');
+    ctx.PrintIndent();
+    out.put(']');
+}
+
+template <>
+void PrintValue<Dict>(const Dict& nodes, const PrintContext& ctx) {
+    std::ostream& out = ctx.out;
+    out << "{\n"sv;
+    bool first = true;
+    auto inner_ctx = ctx.Indented();
+    for (const auto& [key, node] : nodes) {
+        if (first) {
+            first = false;
+        } else {
+            out << ",\n"sv;
+        }
+        inner_ctx.PrintIndent();
+        PrintString(key, ctx.out);
+        out << ": "sv;
+        PrintNode(node, inner_ctx);
+    }
+    out.put('\n');
+    ctx.PrintIndent();
+    out.put('}');
+}
+
+void PrintNode(const Node& node, const PrintContext& ctx) {
+    std::visit(
+        [&ctx](const auto& value) {
+            PrintValue(value, ctx);
+        },
+        node.Content());
+}
+
+std::ostream& operator<<(std::ostream& out, const Node& d) {
+    PrintNode(d,  PrintContext{out});
     return out;
 }
 
 void Print(const Document& doc, std::ostream& output) {
-    visit(VariantPrinter{output}, doc.GetRoot().Content());
+    //visit(VariantPrinter{output}, doc.GetRoot().Content());
+    PrintNode(doc.GetRoot(), PrintContext{output});
 }
 
 }  // namespace json

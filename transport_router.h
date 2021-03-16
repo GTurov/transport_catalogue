@@ -5,28 +5,33 @@
 #include "transport_catalogue.h"
 
 #include <iostream> // debug
+#include <memory>
 #include <unordered_map>
 #include <vector>
 
 namespace transport {
 
-struct TripTime {
-    double wait = 0;
-    double ride = 0;
+struct TripSpending {
+    TripSpending() = default;
+    TripSpending(int stopCount, double waitTime, double tripTime)
+        : stopCount(stopCount), waitTime(waitTime), tripTime(tripTime){}
+    int stopCount = 0;
+    double waitTime = 0;
+    double tripTime = 0;
 };
+
+TripSpending operator+ (const TripSpending& lhs, const TripSpending& rhs);
+bool operator< (const TripSpending& lhs, const TripSpending& rhs);
+bool operator> (const TripSpending& lhs, const TripSpending& rhs);
 
 struct TripItem {
     transport::Stop* from = nullptr;
     transport::Stop* to = nullptr;
-    int stopCount = 0;
-    double time = 0;
+    transport::Route* bus = nullptr;
+    TripSpending spending = {};
 };
 
-inline std::ostream& operator<<(std::ostream& out, const TripItem& item) {
-    out << item.from->name() << " -> "s << item.to->name()
-        << ": " << item.stopCount << " stops, " << item.time << " sec trip time";
-    return out;
-}
+std::ostream& operator<<(std::ostream& out, const TripItem& item);
 
 // Вспомогательный класс для вычисления расстояния между всеми остановками
 // за линейное время
@@ -41,21 +46,22 @@ private:
 };
 
 class RouteFinder {
-    using route = graph::Router<double>::RouteInfo;
-
+    using NavigationGraph = graph::DirectedWeightedGraph<TripSpending>;
+    using GraphWeight = TripSpending;
 public:
     RouteFinder(Catalogue& catalogue, int bus_wait_time , double bus_velocity);
     std::optional<std::vector<TripItem>> findRoute(std::string_view from, std::string_view to);
 
 private:
-    std::optional<route> buildRoute(std::string_view from, std::string_view to);
+    std::optional<graph::Router<double>::RouteInfo> buildRoute(std::string_view from,
+                                                               std::string_view to);
 
 private:
     Catalogue& catalogue_;
-    //graph::Router<double> router_;
-    graph::DirectedWeightedGraph<double> graph_;
+    std::unique_ptr<graph::Router<GraphWeight>> router_;
+    std::unique_ptr<NavigationGraph> graph_;
     std::vector<transport::Stop*> graphVertexes_;
-    std::unordered_map<std::string_view, int> stopToGraphVertex_;
+    std::unordered_map<Stop*, graph::VertexId> stopToGraphVertex_;
     std::vector<TripItem> graphEdges_;
     int bus_wait_time_ = 0;
     double bus_velocity_ = 0;

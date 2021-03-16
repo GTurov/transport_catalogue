@@ -35,6 +35,36 @@ json::Node makeRouteAnswer(int request_id, const transport::Route::Info& data) {
 
 }
 
+json::Node makePathAnswer(int request_id, const std::vector<transport::TripItem>& data) {
+    json::Builder builder;
+    builder.StartArray();
+    double total_time = 0;
+    for (const auto& item: data) {
+        //builder.Value(r->name());
+        total_time += (item.spending.waitTime + item.spending.tripTime);
+        builder.StartDict()
+                .Key("type"s).Value("Wait"s)
+                .Key("stop_name"s).Value(item.from->name())
+                .Key("time"s).Value(item.spending.waitTime / 60)
+                .EndDict()
+
+                .StartDict()
+                .Key("type"s).Value("Bus"s)
+                .Key("bus"s).Value(item.bus->name())
+                .Key("span_count"s).Value(item.spending.stopCount)
+                .Key("time"s).Value(item.spending.tripTime / 60)
+                .EndDict();
+    }
+    json::Node x = builder.EndArray().Build();
+
+    return json::Builder{}
+            .StartDict()
+            .Key("request_id"s).Value(request_id)
+            .Key("total_time"s).Value(total_time / 60)
+            .Key("items"s).Value(x.AsArray())
+            .EndDict().Build();
+}
+
 svg::Color nodeToColor(const json::Node& n) {
     if (n.IsString()) {
         return svg::Color(n.AsString());
@@ -182,7 +212,7 @@ void JsonReader::processQueries(std::istream& in, std::ostream& out) {
     }
 
     //-------------------------------------------------
-    return;
+    //return;
 
     // Process requests
     json::Builder answers;
@@ -229,7 +259,18 @@ void JsonReader::processQueries(std::istream& in, std::ostream& out) {
                         );
         } break;
         case REQUEST_TYPE::ROUTE: {
-            std::cerr << "-----Surprise mazafucka!!---\n"s;
+            if (auto path_info = navigator.findRoute(r.from, r.to); path_info) {
+                answers.Value(makePathAnswer(r.id, path_info.value()).AsDict());
+            } else {
+                answers.Value(
+                json::Builder{}
+                            .StartDict()
+                            .Key("request_id"s).Value(r.id)
+                            .Key("error_message"s).Value("not found"s)
+                            .EndDict()
+                            .Build().AsDict()
+                            );
+            }
         } break;
         default:
             throw std::exception();

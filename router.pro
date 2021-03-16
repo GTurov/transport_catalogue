@@ -36,5 +36,8 @@ DISTFILES += \
     coi.json \
     etalone.svg \
     etalone_map.json \
+    example1.json \
+    example4out.json \
     input_rus.json \
-    my.svg
+    my.svg \
+    out.json
