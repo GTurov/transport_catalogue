@@ -59,14 +59,10 @@ RouteFinder::RouteFinder(Catalogue& catalogue, int bus_wait_time , double bus_ve
     // Создаём сам граф с нужным количеством вершин
     graph_ = std::make_unique<NavigationGraph>(allStops.size());
 
-    // Добавляем вершины и петли для тех остановок, через которые не ходят автобусы
+    // Добавляем вершины
     graph::VertexId vertexCount = 0;
     for (auto* stop: allStops) {
-        //graphVertexes_.push_back(stop);
         stopToGraphVertex_.insert({stop,vertexCount++});
-        //if (catalogue.routesViaStop(stop->name()).size() == 0) {
-        //    addTripItem(stop, stop, nullptr, {0,0,0});
-        //}
     }
 
     // Добавляем грани
@@ -86,7 +82,7 @@ RouteFinder::RouteFinder(Catalogue& catalogue, int bus_wait_time , double bus_ve
     router_ = std::make_unique<graph::Router<GraphWeight>>(*graph_);
 }
 
-std::optional<std::vector<TripItem>> RouteFinder::findRoute(std::string_view from, std::string_view to) {
+std::optional<std::vector<const TripItem *> > RouteFinder::findRoute(std::string_view from, std::string_view to) {
     //std::cerr<<"Find route from "s << from << " to "s << to << std::endl;
     auto stopFrom = catalogue_.stop(from);
     auto stopTo = catalogue_.stop(to);
@@ -94,7 +90,7 @@ std::optional<std::vector<TripItem>> RouteFinder::findRoute(std::string_view fro
         return std::nullopt;
     }
 
-    std::vector<TripItem> result;
+    std::vector<const TripItem*> result;
     if (stopFrom == stopTo) {
         return result;
     }
@@ -110,7 +106,7 @@ std::optional<std::vector<TripItem>> RouteFinder::findRoute(std::string_view fro
     //std::cerr << "Route found:" << (route.value().weight.waitTime + route.value().weight.tripTime) / 60 << " min trip time:\n";
     for (const auto& edge: route.value().edges) {
         //std::cerr << graphEdges_.at(edge) << std::endl;
-        result.push_back(graphEdges_.at(edge));
+        result.push_back(&graphEdges_.at(edge));
     }
     //std::cerr << std::endl << std::endl;
 

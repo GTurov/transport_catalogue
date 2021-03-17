@@ -34,6 +34,8 @@ HEADERS += \
 
 DISTFILES += \
     coi.json \
+    e4_input.json \
+    e4_output.json \
     etalone.svg \
     etalone_map.json \
     example1.json \

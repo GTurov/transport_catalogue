@@ -8,33 +8,33 @@
 
 using namespace transport;
 
-//#define PROFILE_CONCAT_INTERNAL(X, Y) X##Y
-//#define PROFILE_CONCAT(X, Y) PROFILE_CONCAT_INTERNAL(X, Y)
-//#define UNIQUE_VAR_NAME_PROFILE PROFILE_CONCAT(profileGuard, __LINE__)
-//#define LOG_DURATION(x) LogDuration UNIQUE_VAR_NAME_PROFILE(x)
-//#define LOG_DURATION_STREAM(x, y) LogDuration UNIQUE_VAR_NAME_PROFILE(x, y)
+#define PROFILE_CONCAT_INTERNAL(X, Y) X##Y
+#define PROFILE_CONCAT(X, Y) PROFILE_CONCAT_INTERNAL(X, Y)
+#define UNIQUE_VAR_NAME_PROFILE PROFILE_CONCAT(profileGuard, __LINE__)
+#define LOG_DURATION(x) LogDuration UNIQUE_VAR_NAME_PROFILE(x)
+#define LOG_DURATION_STREAM(x, y) LogDuration UNIQUE_VAR_NAME_PROFILE(x, y)
 
-//class LogDuration {
-//public:
-//    using Clock = std::chrono::steady_clock;
+class LogDuration {
+public:
+    using Clock = std::chrono::steady_clock;
 
-//    LogDuration(const std::string_view& id, std::ostream& out = std::cerr)
-//        : id_(id), out_(out) {
-//    }
+    LogDuration(const std::string_view& id, std::ostream& out = std::cerr)
+        : id_(id), out_(out) {
+    }
 
-//    ~LogDuration() {
-//        using namespace std::chrono;
-//        using namespace std::literals;
-//        const auto end_time = Clock::now();
-//        const auto dur = end_time - start_time_;
-//        out_ << id_ << ": "s << duration_cast<milliseconds>(dur).count() << " ms"s << std::endl;
-//    }
+    ~LogDuration() {
+        using namespace std::chrono;
+        using namespace std::literals;
+        const auto end_time = Clock::now();
+        const auto dur = end_time - start_time_;
+        out_ << id_ << ": "s << duration_cast<milliseconds>(dur).count() << " ms"s << std::endl;
+    }
 
-//private:
-//    const std::string id_;
-//    std::ostream& out_;
-//    const Clock::time_point start_time_ = Clock::now();
-//};
+private:
+    const std::string id_;
+    std::ostream& out_;
+    const Clock::time_point start_time_ = Clock::now();
+};
 
 int main()
 {
@@ -55,11 +55,6 @@ int main()
 //                        left[i].AsDict().at("total_time"s).AsDouble() -
 //                        right[i].AsDict().at("total_time"s).AsDouble()
 //                        ) > left[i].AsDict().at("total_time"s).AsDouble()/10000) {
-////                std::cout<<std::abs(
-////                               left[i].AsDict().at("total_time"s).AsDouble() -
-////                               right[i].AsDict().at("total_time"s).AsDouble()
-////                               ) << " "s << left[i].AsDict().at("total_time"s).AsDouble()/10000
-////                        << std::endl;
 //                std::cout<<left[i]<<std::endl;
 //                std::cout<<right[i]<<std::endl<<std::endl;
 //            }
@@ -71,13 +66,12 @@ int main()
 //        }
 //    }
 
+    {
+        LOG_DURATION("Total"sv);
 
-
-
-
-    Catalogue catalogue;
-    JsonReader jreader(catalogue);
-    jreader.processQueries();
-
+        Catalogue catalogue;
+        JsonReader jreader(catalogue);
+        jreader.processQueries();
+    }
     return 0;
 }

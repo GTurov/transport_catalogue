@@ -35,24 +35,23 @@ json::Node makeRouteAnswer(int request_id, const transport::Route::Info& data) {
 
 }
 
-json::Node makePathAnswer(int request_id, const std::vector<transport::TripItem>& data) {
+json::Node makePathAnswer(int request_id, const std::vector<const transport::TripItem*>& data) {
     json::Builder builder;
     builder.StartArray();
     double total_time = 0;
     for (const auto& item: data) {
-        //builder.Value(r->name());
-        total_time += (item.spending.waitTime + item.spending.tripTime);
+        total_time += (item->spending.waitTime + item->spending.tripTime);
         builder.StartDict()
                 .Key("type"s).Value("Wait"s)
-                .Key("stop_name"s).Value(item.from->name())
-                .Key("time"s).Value(item.spending.waitTime / 60)
+                .Key("stop_name"s).Value(item->from->name())
+                .Key("time"s).Value(item->spending.waitTime / 60)
                 .EndDict()
 
                 .StartDict()
                 .Key("type"s).Value("Bus"s)
-                .Key("bus"s).Value(item.bus->name())
-                .Key("span_count"s).Value(item.spending.stopCount)
-                .Key("time"s).Value(item.spending.tripTime / 60)
+                .Key("bus"s).Value(item->bus->name())
+                .Key("span_count"s).Value(item->spending.stopCount)
+                .Key("time"s).Value(item->spending.tripTime / 60)
                 .EndDict();
     }
     json::Node x = builder.EndArray().Build();

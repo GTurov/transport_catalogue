@@ -50,18 +50,15 @@ class RouteFinder {
     using NavigationGraph = graph::DirectedWeightedGraph<GraphWeight>;
 public:
     RouteFinder(Catalogue& catalogue, int bus_wait_time , double bus_velocity);
-    std::optional<std::vector<TripItem>> findRoute(std::string_view from, std::string_view to);
+    std::optional<std::vector<const TripItem*>> findRoute(std::string_view from, std::string_view to);
 
 private:
-    //std::optional<graph::Router<double>::RouteInfo> buildRoute(std::string_view from,
-    //                                                           std::string_view to);
     void addTripItem(Stop* from, Stop* to, Route* route, TripSpending&& spending);
 
 private:
     Catalogue& catalogue_;
     std::unique_ptr<graph::Router<GraphWeight>> router_;
     std::unique_ptr<NavigationGraph> graph_;
-    //std::vector<transport::Stop*> graphVertexes_;
     std::unordered_map<Stop*, graph::VertexId> stopToGraphVertex_;
     std::vector<TripItem> graphEdges_;
     int bus_wait_time_ = 0;
