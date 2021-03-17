@@ -149,6 +149,10 @@
             "id": 8,
             "to": "Huyazhskaya",
             "type": "Route"
+        },
+        {
+            "id": 9,
+            "type": "Map"
         }
 
     ]

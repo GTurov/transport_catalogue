@@ -60,11 +60,12 @@ RouteFinder::RouteFinder(Catalogue& catalogue, int bus_wait_time , double bus_ve
     graph_ = std::make_unique<NavigationGraph>(allStops.size());
 
     // Добавляем вершины и петли для тех остановок, через которые не ходят автобусы
+    graph::VertexId vertexCount = 0;
     for (auto* stop: allStops) {
-        graphVertexes_.push_back(stop);
-        stopToGraphVertex_.insert({stop,graphVertexes_.size()-1});
+        //graphVertexes_.push_back(stop);
+        stopToGraphVertex_.insert({stop,vertexCount++});
         //if (catalogue.routesViaStop(stop->name()).size() == 0) {
-            addTripItem(stop, stop, nullptr, {0,0,0});
+        //    addTripItem(stop, stop, nullptr, {0,0,0});
         //}
     }
 
@@ -116,8 +117,8 @@ std::optional<std::vector<TripItem>> RouteFinder::findRoute(std::string_view fro
     return result;
 }
 
-void RouteFinder::addTripItem(Stop* from, Stop* to, Route* route, TripSpending spending) {
-    TripItem item{from, to, route, std::move(spending)};
+void RouteFinder::addTripItem(Stop* from, Stop* to, Route* route, TripSpending &&spending) {
+    TripItem item{from, to, route, spending};
     //std::cerr<<"Edge "<<item << ", "s<<df.distanceBetween(i,j)<<" m"<<std::endl;
     int id = graph_->AddEdge(graph::Edge<GraphWeight>{stopToGraphVertex_[item.from],
                                                       stopToGraphVertex_[item.to], item.spending});

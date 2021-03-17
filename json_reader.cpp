@@ -252,8 +252,7 @@ void JsonReader::processQueries(std::istream& in, std::ostream& out) {
             json::Builder{}
                         .StartDict()
                         .Key("request_id"s).Value(r.id)
-                        .Key("total_time"s).Value(0)
-                        .Key("items"s).Value(renderer.render())
+                        .Key("map"s).Value(renderer.render())
                         .EndDict()
                         .Build().AsDict()
                         );
