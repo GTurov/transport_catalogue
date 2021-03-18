@@ -62,7 +62,7 @@ void Catalogue::addStop(const std::string_view name, const geo::Coordinates &pla
 void Catalogue::addRoute(Route* route) {
     routes_.push_back(route);
     nameToBus_[route->name()] = route;
-    int length_ = 0;
+    double length_ = 0;
     for (int i = 0; i < (int)route->stops().size()-1; ++i) {
         length_ += distanceBetween(route->stops()[i],route->stops()[i+1]);
     }
@@ -92,7 +92,7 @@ void Catalogue::setDistance(Stop* first, Stop* second, int meters) {
     }
 }
 
-void Catalogue::setDistance(const std::string_view first, const std::string_view second, int meters) {
+void Catalogue::setDistance(const std::string_view first, const std::string_view second, double meters) {
     if ((nameToStop_.find(first) == nameToStop_.end()) || (nameToStop_.find(second) == nameToStop_.end())) {
         throw std::invalid_argument("Invalid stop"s);
     }
@@ -143,7 +143,7 @@ std::optional<const Stop::Info> Catalogue::stopInfo(const std::string_view name)
     return result;
 }
 
-int Catalogue::distanceBetween(Stop* first, Stop* second) const {
+double Catalogue::distanceBetween(Stop* first, Stop* second) const {
     if ((first!= nullptr) && (second != nullptr)) {
         if (stopsToDistances_.find({first, second}) != stopsToDistances_.end()) {
             return stopsToDistances_.at({first, second});
@@ -158,7 +158,7 @@ int Catalogue::distanceBetween(Stop* first, Stop* second) const {
         throw std::invalid_argument("Invalid stop"s);
     }
 }
-int Catalogue::distanceBetween(const std::string_view first, const std::string_view second) const {
+double Catalogue::distanceBetween(const std::string_view first, const std::string_view second) const {
     if ((nameToStop_.find(first) == nameToStop_.end()) || (nameToStop_.find(second) == nameToStop_.end())) {
         throw std::invalid_argument("Invalid stop"s);
     }

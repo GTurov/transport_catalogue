@@ -16,7 +16,7 @@ class Route {
 public:
     Route(const std::string_view name, const std::vector<Stop*>& stops,
               bool cycled = false);
-    void setLength(int meters) {
+    void setLength(double meters) {
         length_ = meters;
         curvature_ = directLength_==0?1:(double) length_ / directLength_;
     }
@@ -25,7 +25,7 @@ public:
     bool isCycled() const {return isCycled_;}
     int stopsCount() const {return (isCycled_?stops_.size():stops_.size()*2-1);}
     int uniqueStopCount() const {return uniqueStopCount_;}
-    int length() const {return length_;}
+    double length() const {return length_;}
     double curvature() const {return curvature_;}
     struct Info {
         std::string name = ""s;
@@ -40,7 +40,7 @@ private:
     std::vector<Stop*> stops_;
     bool isCycled_ = false;
     double directLength_ = 0;
-    int length_ = 0;
+    double length_ = 0;
     double curvature_ = 1.0;
     int uniqueStopCount_ = 0;
 };

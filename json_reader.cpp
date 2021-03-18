@@ -109,7 +109,7 @@ void JsonReader::processQueries(std::istream& in, std::ostream& out) {
     struct distance {
         std::string from;
         std::string to;
-        int meters;
+        double meters;
     };
     std::vector<distance> distances;
 
@@ -120,7 +120,7 @@ void JsonReader::processQueries(std::istream& in, std::ostream& out) {
         double longitude  = n->AsDict().at("longitude"s).AsDouble();
         catalogue_.addStop(name, {latitude, longitude});
         for(const auto& d: n->AsDict().at("road_distances"s).AsDict()) {
-            distances.push_back({name,d.first,d.second.AsInt()});
+            distances.push_back({name,d.first,d.second.AsDouble()});
         }
     }
 
