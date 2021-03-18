@@ -31,7 +31,7 @@ public:
         std::string name = ""s;
         int stopCount = 0;
         int uniqueStopCount = 0;
-        int length = 0;
+        double length = 0;
         double curvature = 1.0;
     };
 
