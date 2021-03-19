@@ -12,11 +12,6 @@ using namespace std::literals; //debug
 
 namespace json {
 
-namespace detail {
-
-Node ValueToNode(const Data &value);
-
-} //namespace detail
 
 class DictValueContext;
 class DictItemContext;
@@ -27,7 +22,9 @@ public:
     Builder() {}
     ~Builder() {Clear();}
     DictValueContext Key(const std::string& key);
+    DictValueContext Key(std::string&& key);
     Builder& Value(const Data& value);
+    Builder& Value(Data&& value);
     DictItemContext StartDict();
     Builder& EndDict();
     ArrayItemContext StartArray();
@@ -48,6 +45,7 @@ public:
     ArrayItemContext(Builder& b)
         :b_(b){}
     ArrayItemContext Value(const Data& value) {return ArrayItemContext(b_.Value(value));}
+    ArrayItemContext Value(Data&& value) {return ArrayItemContext(b_.Value(value));}
     DictItemContext StartDict();
     ArrayItemContext StartArray() {return b_.StartArray();}
     Builder& EndArray() {return b_.EndArray();}
@@ -60,6 +58,7 @@ public:
     DictItemContext(Builder& b)
         :b_(b){}
     DictValueContext Key(const std::string& key);
+    DictValueContext Key(std::string&& key);
     Builder& EndDict() {return b_.EndDict();}
 private:
     Builder& b_;
@@ -70,6 +69,7 @@ public:
     DictValueContext(Builder& b)
         :b_(b){}
     DictItemContext Value(const Data& value) {return DictItemContext(b_.Value(value));}
+    DictItemContext Value(Data&& value) {return DictItemContext(b_.Value(value));}
     DictItemContext StartDict() {return b_.StartDict();}
     ArrayItemContext StartArray() {return b_.StartArray();}
 private:

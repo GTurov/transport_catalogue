@@ -38,40 +38,13 @@ private:
 
 int main()
 {
-//    std::ifstream l("out.json");
-//    json::Node lhs = json::Load(l).GetRoot();
-
-//    std::ifstream r("e4_output.json");
-//    json::Node rhs = json::Load(r).GetRoot();
-
-//    //std::cerr<<lhs.GetRoot().AsArray().size();
-//    assert(lhs.AsArray().size() == rhs.AsArray().size());
-
-//    const json::Array& left = lhs.AsArray();
-//    const json::Array& right = rhs.AsArray();
-//    for (int i = 0; i < (int)lhs.AsArray().size(); ++i) {
-//        if (left[i].AsDict().find("total_time"s) != left[i].AsDict().end()) {
-//            if (std::abs(
-//                        left[i].AsDict().at("total_time"s).AsDouble() -
-//                        right[i].AsDict().at("total_time"s).AsDouble()
-//                        ) > left[i].AsDict().at("total_time"s).AsDouble()/10000) {
-//                std::cout<<left[i]<<std::endl;
-//                std::cout<<right[i]<<std::endl<<std::endl;
-//            }
-//        } else {
-//            if (left[i] != right[i]) {
-//                std::cout<<left[i]<<std::endl;
-//                std::cout<<right[i]<<std::endl<<std::endl;
-//            }
-//        }
-//    }
-
     {
         LOG_DURATION("Total"sv);
+        std::iostream null (0);
 
         Catalogue catalogue;
         JsonReader jreader(catalogue);
-        jreader.processQueries();
+        jreader.processQueries(std::cin, null);
     }
     return 0;
 }

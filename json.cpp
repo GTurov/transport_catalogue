@@ -277,6 +277,14 @@ Node::Node(Dict map)
     : data_(move(map)) {
 }
 
+Node::Node(Data&& value)
+    : data_(move(value)) {
+}
+
+Node::Node(const Data& value)
+    : data_(value) {
+}
+
 bool Node::AsBool() const {
     if (std::holds_alternative<bool>(data_)) {
         return get<bool>(data_);

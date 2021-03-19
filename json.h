@@ -33,6 +33,8 @@ public:
     Node(std::string value);
     Node(Array array);
     Node(Dict map);
+    Node(Data&& value);
+    Node(const Data& value);
 
     bool AsBool() const;
     int AsInt() const;

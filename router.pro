@@ -34,6 +34,7 @@ HEADERS += \
 
 DISTFILES += \
     coi.json \
+    double_oout.json \
     e4_input.json \
     e4_output.json \
     etalone.svg \

@@ -17,7 +17,7 @@ json::Node makeStopAnswer(int request_id, const transport::Stop::Info& data) {
     return json::Builder{}
             .StartDict()
             .Key("request_id"s).Value(request_id)
-            .Key("buses"s).Value(x.AsArray())
+            .Key("buses"s).Value(std::move(x.AsArray()))
             .EndDict().Build();
 }
 
@@ -60,7 +60,7 @@ json::Node makePathAnswer(int request_id, const std::vector<const transport::Tri
             .StartDict()
             .Key("request_id"s).Value(request_id)
             .Key("total_time"s).Value(total_time / 60)
-            .Key("items"s).Value(x.AsArray())
+            .Key("items"s).Value(std::move(x.AsArray()))
             .EndDict().Build();
 }
 

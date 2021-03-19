@@ -4,10 +4,7 @@ namespace json {
 
 using namespace std::literals;
 
-Node detail::ValueToNode(const Data &value) {
-    return std::visit([](auto &value){return Node(value);},value);
-}
-
+// Жамшют гаурит, два раза кода ма написан - в 2 раза быстрее
 DictValueContext Builder::Key(const std::string &key) {
     // Если режим правки и на вершине стека мап, добавляем ноду со именем ключа
     // Иначе выводим разные ошибки
@@ -28,6 +25,26 @@ DictValueContext Builder::Key(const std::string &key) {
     return DictValueContext(*this);
 }
 
+DictValueContext Builder::Key(std::string&& key) {
+    // Если режим правки и на вершине стека мап, добавляем ноду со именем ключа
+    // Иначе выводим разные ошибки
+    switch (state_) {
+    case state::EMPTY:  throw std::logic_error("empty node key add attempt"s); break;
+    case state::EDITION: {
+        if (nodesStack_.top()->IsDict()) {
+            nodesStack_.push(std::make_unique<Node>(std::move(key)));
+        } else {
+            throw std::logic_error(IsDictKeyTop()?
+                                       "dict key entered twice"s:
+                                       "not dict node key add attempt"s);
+        }
+    } break;
+    case state::READY: throw std::logic_error("ready node key add attempt"s); break;
+    default: throw std::logic_error("dict key common error"s);
+    }
+    return DictValueContext(*this);
+}
+
 Builder& Builder::Value(const Data &value) {
     // Если состояние пустое, добавляем ноду и выставляем реди.
     // Если состояние правки и на вершине массив, добавляем в него ноду
@@ -35,19 +52,50 @@ Builder& Builder::Value(const Data &value) {
     // Если нода собрана, выводим ошибку
     switch (state_) {
     case state::EMPTY: {
-        nodesStack_.push(std::make_unique<Node>(detail::ValueToNode(value)));
+        nodesStack_.push(std::make_unique<Node>(std::move(value)));
         state_ = state::READY;
     } break;
     case state::EDITION: {
         if (nodesStack_.top()->IsArray()) {
             json::Array tmp = std::move(nodesStack_.top()->AsArray());
-            tmp.emplace_back(detail::ValueToNode(value));
+            tmp.emplace_back(std::move(value));
             *nodesStack_.top() = Node(std::move(tmp));
         } else if (IsDictKeyTop()) {
             std::string key = std::move(nodesStack_.top()->AsString());
             nodesStack_.pop();
             json::Dict dict = std::move(nodesStack_.top()->AsDict());
-            dict.insert({key,detail::ValueToNode(value)});
+            dict.insert({key, Node(std::move(value))});
+            *nodesStack_.top() = Node(std::move(dict));
+        } else {
+            throw std::logic_error("dict value without key add attempt"s);
+        }
+    } break;
+    case state::READY: throw std::logic_error("ready node value add attempt"s); break;
+    default: throw std::logic_error("value common error"s);
+    }
+    return *this;
+}
+
+Builder& Builder::Value(Data&& value) {
+    // Если состояние пустое, добавляем ноду и выставляем реди.
+    // Если состояние правки и на вершине массив, добавляем в него ноду
+    // Если состояние правки, размер стека >1 и на вершине строка(имя ключа), забираем строку и создаём пару
+    // Если нода собрана, выводим ошибку
+    switch (state_) {
+    case state::EMPTY: {
+        nodesStack_.push(std::make_unique<Node>(std::move(value)));
+        state_ = state::READY;
+    } break;
+    case state::EDITION: {
+        if (nodesStack_.top()->IsArray()) {
+            json::Array tmp = std::move(nodesStack_.top()->AsArray());
+            tmp.emplace_back(std::move(value));
+            *nodesStack_.top() = Node(std::move(tmp));
+        } else if (IsDictKeyTop()) {
+            std::string key = std::move(nodesStack_.top()->AsString());
+            nodesStack_.pop();
+            json::Dict dict = std::move(nodesStack_.top()->AsDict());
+            dict.insert({key, Node(std::move(value))});
             *nodesStack_.top() = Node(std::move(dict));
         } else {
             throw std::logic_error("dict value without key add attempt"s);
@@ -171,6 +219,10 @@ DictItemContext ArrayItemContext::StartDict() {
 }
 
 DictValueContext DictItemContext::Key(const std::string &key) {
+    return b_.Key(key);
+}
+
+DictValueContext DictItemContext::Key(std::string&& key) {
     return b_.Key(key);
 }
 
