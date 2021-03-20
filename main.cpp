@@ -13,7 +13,6 @@ int main()
 
         Catalogue catalogue;
         JsonReader jreader(catalogue);
-        //jreader.processQueries(std::cin, null);
         jreader.processQueries();
     }
     return 0;

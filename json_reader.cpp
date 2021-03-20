@@ -216,26 +216,16 @@ void JsonReader::processQueries(std::istream& in, std::ostream& out) {
     //return;
     LOG_DURATION("Process requests"sv);
     // Process requests
-    json::Builder answers;
-    answers.StartArray();
-    json::Array ans(pure_requests.size());
+    json::Array answers(pure_requests.size());
     int request_count = 0;
-    for (const request& r: pure_requests) {
+    for (size_t i = 0; i < pure_requests.size(); ++i) {
+        const auto& r = pure_requests[i];
         switch (r.type) {
         case REQUEST_TYPE::STOP: {
             if (auto stop_info = catalogue_.stopInfo(r.name); stop_info) {
-                //answers.Value(makeStopAnswer(r.id, *stop_info).AsDict());
-                ans[request_count] = makeStopAnswer(r.id, *stop_info).AsDict();
+                answers[request_count] = makeStopAnswer(r.id, *stop_info).AsDict();
             } else {
-//                answers.Value(
-//                json::Builder{}
-//                            .StartDict()
-//                            .Key("request_id"s).Value(r.id)
-//                            .Key("error_message"s).Value("not found"s)
-//                            .EndDict()
-//                            .Build().AsDict()
-//                            );
-                ans[request_count] = json::Builder{}
+                answers[request_count] = json::Builder{}
                         .StartDict()
                         .Key("request_id"s).Value(r.id)
                         .Key("error_message"s).Value("not found"s)
@@ -245,18 +235,9 @@ void JsonReader::processQueries(std::istream& in, std::ostream& out) {
         } break;
         case REQUEST_TYPE::BUS: {
             if (auto route_info = catalogue_.routeInfo(r.name); route_info) {
-//                answers.Value(makeRouteAnswer(r.id, *route_info).AsDict());
-                ans[request_count] = makeRouteAnswer(r.id, *route_info).AsDict();
+                answers[request_count] = makeRouteAnswer(r.id, *route_info).AsDict();
             } else {
-//                answers.Value(
-//                json::Builder{}
-//                            .StartDict()
-//                            .Key("request_id"s).Value(r.id)
-//                            .Key("error_message"s).Value("not found"s)
-//                            .EndDict()
-//                            .Build().AsDict()
-//                            );
-                ans[request_count] =
+                answers[request_count] =
                 json::Builder{}
                             .StartDict()
                             .Key("request_id"s).Value(r.id)
@@ -266,15 +247,7 @@ void JsonReader::processQueries(std::istream& in, std::ostream& out) {
             }
         } break;
         case REQUEST_TYPE::MAP: {
-//            answers.Value(
-//            json::Builder{}
-//                        .StartDict()
-//                        .Key("request_id"s).Value(r.id)
-//                        .Key("map"s).Value(renderer.render())
-//                        .EndDict()
-//                        .Build().AsDict()
-//                        );
-            ans[request_count] =
+            answers[request_count] =
             json::Builder{}
                         .StartDict()
                         .Key("request_id"s).Value(r.id)
@@ -284,18 +257,9 @@ void JsonReader::processQueries(std::istream& in, std::ostream& out) {
         } break;
         case REQUEST_TYPE::ROUTE: {
             if (auto path_info = navigator.findRoute(r.from, r.to); path_info) {
-                //answers.Value(makePathAnswer(r.id, path_info.value()).AsDict());
-                ans[request_count] = makePathAnswer(r.id, path_info.value()).AsDict();
+                answers[request_count] = makePathAnswer(r.id, path_info.value()).AsDict();
             } else {
-//                answers.Value(
-//                json::Builder{}
-//                            .StartDict()
-//                            .Key("request_id"s).Value(r.id)
-//                            .Key("error_message"s).Value("not found"s)
-//                            .EndDict()
-//                            .Build().AsDict()
-//                            );
-                ans[request_count] =
+                answers[request_count] =
                 json::Builder{}
                             .StartDict()
                             .Key("request_id"s).Value(r.id)
@@ -309,7 +273,5 @@ void JsonReader::processQueries(std::istream& in, std::ostream& out) {
         }
         ++request_count;
     }
-    //answers.EndArray();
-    //out << answers.Build();
-    out << Node(ans);
+    out << Node(answers);
 }
