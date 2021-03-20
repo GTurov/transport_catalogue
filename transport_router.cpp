@@ -1,5 +1,7 @@
 #include "transport_router.h"
 
+#include "log_duration.h"
+
 namespace transport {
 
 
@@ -52,7 +54,7 @@ RouteFinder::RouteFinder(Catalogue& catalogue, int bus_wait_time , double bus_ve
     : catalogue_(catalogue),
       bus_wait_time_(bus_wait_time*60),
       bus_velocity_(bus_velocity/3.6) {
-
+    LOG_DURATION("RouteFinder construction"sv);
     // Все остановки будут вершинами графа. Добавим их в словарь для быстрого поиска вершины по названию.
     auto allStops = catalogue_.allStops();
 

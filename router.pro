@@ -23,6 +23,7 @@ HEADERS += \
     json.h \
     json_builder.h \
     json_reader.h \
+    log_duration.h \
     map_renderer.h \
     ranges.h \
     request_handler.h \
