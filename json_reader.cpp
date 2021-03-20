@@ -210,70 +210,63 @@ void JsonReader::processQueries(std::istream& in, std::ostream& out) {
         pure_requests.push_back(r);
     }
 
-    //-------------------------------------------------
-    //return;
-
     // Process requests
-    json::Builder answers;
-    answers.StartArray();
-    for (const request& r: pure_requests) {
+    // Отказываемся от использования билдера, поскольку это существенно ускоряет код
+    json::Array answers(pure_requests.size());
+    for (int i = 0; i < static_cast<int>(answers.size()); ++i) {
+        auto r = pure_requests[i];
         switch (r.type) {
         case REQUEST_TYPE::STOP: {
             if (auto stop_info = catalogue_.stopInfo(r.name); stop_info) {
-                answers.Value(makeStopAnswer(r.id, *stop_info).AsDict());
+                answers[i] = makeStopAnswer(r.id, *stop_info);
             } else {
-                answers.Value(
+                answers[i] =
                 json::Builder{}
                             .StartDict()
                             .Key("request_id"s).Value(r.id)
                             .Key("error_message"s).Value("not found"s)
                             .EndDict()
-                            .Build().AsDict()
-                            );
+                            .Build();
             }
         } break;
         case REQUEST_TYPE::BUS: {
             if (auto route_info = catalogue_.routeInfo(r.name); route_info) {
-                answers.Value(makeRouteAnswer(r.id, *route_info).AsDict());
+                answers[i] = makeRouteAnswer(r.id, *route_info);
             } else {
-                answers.Value(
+                answers[i] =
                 json::Builder{}
                             .StartDict()
                             .Key("request_id"s).Value(r.id)
                             .Key("error_message"s).Value("not found"s)
                             .EndDict()
-                            .Build().AsDict()
-                            );
+                            .Build();
             }
         } break;
         case REQUEST_TYPE::MAP: {
-            answers.Value(
+            answers[i] =
             json::Builder{}
                         .StartDict()
                         .Key("request_id"s).Value(r.id)
                         .Key("map"s).Value(renderer.render())
                         .EndDict()
-                        .Build().AsDict()
-                        );
+                        .Build();
         } break;
         case REQUEST_TYPE::ROUTE: {
             if (auto path_info = navigator.findRoute(r.from, r.to); path_info) {
-                answers.Value(makePathAnswer(r.id, path_info.value()).AsDict());
+                answers[i] = makePathAnswer(r.id, path_info.value());
             } else {
-                answers.Value(
+                answers[i] =
                 json::Builder{}
                             .StartDict()
                             .Key("request_id"s).Value(r.id)
                             .Key("error_message"s).Value("not found"s)
                             .EndDict()
-                            .Build().AsDict()
-                            );
+                            .Build();
             }
         } break;
         default:
             throw std::exception();
         }
     }
-    answers.EndArray();
-    out << answers.Build();
+    out << Node(answers);
 }
