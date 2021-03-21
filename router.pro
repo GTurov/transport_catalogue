@@ -11,7 +11,6 @@ SOURCES += \
         main.cpp \
         map_renderer.cpp \
         request_handler.cpp \
-        stat_reader.cpp \
         svg.cpp \
         transport_catalogue.cpp \
         transport_router.cpp
@@ -27,7 +26,6 @@ HEADERS += \
     ranges.h \
     request_handler.h \
     router.h \
-    stat_reader.h \
     svg.h \
     transport_catalogue.h \
     transport_router.h

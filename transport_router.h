@@ -39,8 +39,8 @@ public:
     DistanceFinder(const Catalogue& catalogue, const Route* route);
     int distanceBetween(int fromStopIndex, int toStopIndex);
 private:
-    std::vector<int> direct_distances_;
-    std::vector<int> reverse_distances_;
+    std::vector<int> directDistances_;
+    std::vector<int> reverseDistances_;
 
 };
 
@@ -48,7 +48,7 @@ class RouteFinder {
     using GraphWeight = TripSpending;
     using NavigationGraph = graph::DirectedWeightedGraph<GraphWeight>;
 public:
-    RouteFinder(const Catalogue& catalogue, int bus_wait_time , double bus_velocity);
+    RouteFinder(const Catalogue& catalogue, int busWaitTime , double busVelocity);
     std::optional<std::vector<const TripItem*>> findRoute(std::string_view from, std::string_view to);
 
 private:
@@ -60,8 +60,8 @@ private:
     std::unique_ptr<NavigationGraph> graph_;
     std::unordered_map<const Stop*, graph::VertexId> stopToGraphVertex_;
     std::vector<TripItem> graphEdges_;
-    int bus_wait_time_ = 0;
-    double bus_velocity_ = 0;
+    int busWaitTime_ = 0;
+    double busVelocity_ = 0;
 
 };
 

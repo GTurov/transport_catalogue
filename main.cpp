@@ -6,7 +6,7 @@ using namespace transport;
 int main()
 {
     Catalogue catalogue;
-    JsonReader jreader(catalogue);
-    jreader.processQueries();
+    JsonReader jReader(catalogue);
+    jReader.processQueries();
     return 0;
 }

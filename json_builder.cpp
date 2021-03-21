@@ -4,20 +4,20 @@ namespace json {
 
 using namespace std::literals;
 
-Node detail::ValueToNode(const Data &value) {
+Node detail::valueToNode(const Data &value) {
     return std::visit([](auto &value){return Node(value);},value);
 }
 
-DictValueContext Builder::Key(const std::string &key) {
+DictValueContext Builder::key(const std::string &key) {
     // Если режим правки и на вершине стека мап, добавляем ноду со именем ключа
     // Иначе выводим разные ошибки
     switch (state_) {
     case state::EMPTY:  throw std::logic_error("empty node key add attempt"s); break;
     case state::EDITION: {
-        if (nodesStack_.top()->IsDict()) {
+        if (nodesStack_.top()->isDict()) {
             nodesStack_.push(std::make_unique<Node>(key));
         } else {
-            throw std::logic_error(IsDictKeyTop()?
+            throw std::logic_error(isDictKeyTop()?
                                        "dict key entered twice"s:
                                        "not dict node key add attempt"s);
         }
@@ -28,26 +28,26 @@ DictValueContext Builder::Key(const std::string &key) {
     return DictValueContext(*this);
 }
 
-Builder& Builder::Value(const Data &value) {
+Builder& Builder::value(const Data &value) {
     // Если состояние пустое, добавляем ноду и выставляем реди.
     // Если состояние правки и на вершине массив, добавляем в него ноду
     // Если состояние правки, размер стека >1 и на вершине строка(имя ключа), забираем строку и создаём пару
     // Если нода собрана, выводим ошибку
     switch (state_) {
     case state::EMPTY: {
-        nodesStack_.push(std::make_unique<Node>(detail::ValueToNode(value)));
+        nodesStack_.push(std::make_unique<Node>(detail::valueToNode(value)));
         state_ = state::READY;
     } break;
     case state::EDITION: {
-        if (nodesStack_.top()->IsArray()) {
-            json::Array tmp = std::move(nodesStack_.top()->AsArray());
-            tmp.emplace_back(detail::ValueToNode(value));
+        if (nodesStack_.top()->isArray()) {
+            json::Array tmp = std::move(nodesStack_.top()->asArray());
+            tmp.emplace_back(detail::valueToNode(value));
             *nodesStack_.top() = Node(std::move(tmp));
-        } else if (IsDictKeyTop()) {
-            std::string key = std::move(nodesStack_.top()->AsString());
+        } else if (isDictKeyTop()) {
+            std::string key = std::move(nodesStack_.top()->asString());
             nodesStack_.pop();
-            json::Dict dict = std::move(nodesStack_.top()->AsDict());
-            dict.insert({key,detail::ValueToNode(value)});
+            json::Dict dict = std::move(nodesStack_.top()->asDict());
+            dict.insert({key,detail::valueToNode(value)});
             *nodesStack_.top() = Node(std::move(dict));
         } else {
             throw std::logic_error("dict value without key add attempt"s);
@@ -59,14 +59,14 @@ Builder& Builder::Value(const Data &value) {
     return *this;
 }
 
-DictItemContext Builder::StartDict() {
+DictItemContext Builder::startDict() {
     // Если состояние пустое, выставляем правку и пушим ноду мапа в стек
     // Если правка, пушим стек
     // Если нода готова, ошибка
     switch (state_) {
     case state::EMPTY: state_ = state::EDITION; nodesStack_.push(std::make_unique<Node>(Dict())); break;
     case state::EDITION:
-        if (!nodesStack_.top()->IsDict()) {
+        if (!nodesStack_.top()->isDict()) {
             nodesStack_.push(std::make_unique<Node>(Dict()));
         } else {
             throw std::logic_error("start dict in another dict error"s);
@@ -77,7 +77,7 @@ DictItemContext Builder::StartDict() {
     return DictItemContext(*this);
 }
 
-Builder& Builder::EndDict() {
+Builder& Builder::endDict() {
     // Если состояние пустое, то ошибка
     // Если решим правки, проверяем, что на вершине стека мап
     // Если мап единственный в стеке, значит нода собрана
@@ -86,16 +86,16 @@ Builder& Builder::EndDict() {
     switch (state_) {
     case state::EMPTY: throw std::logic_error("empty node end dict attempt"s); break;
     case state::EDITION: {
-        if (nodesStack_.top()->IsDict()) {
+        if (nodesStack_.top()->isDict()) {
             if (nodesStack_.size() == 1) {
                 state_ = state::READY;
             } else {
-                json::Dict value = std::move(nodesStack_.top()->AsDict());
+                json::Dict value = std::move(nodesStack_.top()->asDict());
                 nodesStack_.pop();
-                Value(value);
+                this->value(value);
             }
         } else {
-            throw std::logic_error(nodesStack_.top()->IsString()?
+            throw std::logic_error(nodesStack_.top()->isString()?
                                        "dict value expected"s:
                                        "it is not a dict"s);
         }
@@ -106,14 +106,14 @@ Builder& Builder::EndDict() {
     return *this;
 }
 
-ArrayItemContext Builder::StartArray() {
+ArrayItemContext Builder::startArray() {
     // Если нода пустая, выставляем правку и пушим массив в стек
     // Если правка и наверху стека не пустой мап, пушим массив в стек
     // Если нода готова, ошибка
     switch (state_) {
     case state::EMPTY: state_ = state::EDITION; nodesStack_.push(std::make_unique<Node>(Array())); break;
     case state::EDITION: {
-        if (nodesStack_.top()->IsDict()) {
+        if (nodesStack_.top()->isDict()) {
             throw std::logic_error("start array error. enter a dict key first"s);
         }
         nodesStack_.push(std::make_unique<Node>(Array()));
@@ -124,7 +124,7 @@ ArrayItemContext Builder::StartArray() {
     return ArrayItemContext(*this);
 }
 
-Builder& Builder::EndArray() {
+Builder& Builder::endArray() {
     // Если состояние пустое, выводим ошибку
     // Проверяем, что на вершне стека массив
     // Если в стеке только массив, значит выставляем состояние реди
@@ -133,13 +133,13 @@ Builder& Builder::EndArray() {
     switch (state_) {
     case state::EMPTY: throw std::logic_error("empty node end array attempt"s); break;
     case state::EDITION: {
-        if (nodesStack_.top()->IsArray()) {
+        if (nodesStack_.top()->isArray()) {
             if (nodesStack_.size() == 1) {
                 state_ = state::READY;
             } else {
-                json::Array value = std::move(nodesStack_.top()->AsArray());
+                json::Array value = std::move(nodesStack_.top()->asArray());
                 nodesStack_.pop();
-                Value(value);
+                this->value(value);
             }
         } else {
             throw std::logic_error("non-array node end array attempt"s);
@@ -151,7 +151,7 @@ Builder& Builder::EndArray() {
     return *this;
 }
 
-Node Builder::Build() {
+Node Builder::build() {
     if (state_ == state::READY) {
         return *nodesStack_.top();
     } else {
@@ -159,19 +159,19 @@ Node Builder::Build() {
     }
 }
 
-void Builder::Clear() {
+void Builder::clear() {
     while (!nodesStack_.empty()) {
         nodesStack_.pop();
     }
     state_ = state::EMPTY;
 }
 
-DictItemContext ArrayItemContext::StartDict() {
-    return b_.StartDict();
+DictItemContext ArrayItemContext::startDict() {
+    return b_.startDict();
 }
 
-DictValueContext DictItemContext::Key(const std::string &key) {
-    return b_.Key(key);
+DictValueContext DictItemContext::key(const std::string &key) {
+    return b_.key(key);
 }
 
 } // namespace json

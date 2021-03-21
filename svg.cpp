@@ -4,43 +4,43 @@ namespace svg {
 
 using namespace std::literals;
 
-void Object::Render(const RenderContext& context) const {
-    context.RenderIndent();
+void Object::render(const RenderContext& context) const {
+    context.renderIndent();
 
-    RenderObject(context);
+    renderObject(context);
 
     context.out << std::endl;
 }
 
 // ---------- Circle ------------------
 
-Circle& Circle::SetCenter(Point center)  {
+Circle& Circle::setCenter(Point center)  {
     center_ = center;
     return *this;
 }
 
-Circle& Circle::SetRadius(double radius)  {
+Circle& Circle::setRadius(double radius)  {
     radius_ = radius;
     return *this;
 }
 
-void Circle::RenderObject(const RenderContext& context) const {
+void Circle::renderObject(const RenderContext& context) const {
     auto& out = context.out;
     out << "<circle";
     out << " cx=\""sv << center_.x << "\" cy=\""sv << center_.y << "\""sv;
     out << " r=\""sv << radius_ << "\""sv;
-    RenderAttrs(context.out);
+    renderAttrs(context.out);
     out << "/>"sv;
 }
 
 // ---------- Polyline ---------------
 
-Polyline& Polyline::AddPoint(Point p) {
+Polyline& Polyline::addPoint(Point p) {
     points_.push_back(p);
     return *this;
 }
 
-void Polyline::RenderObject(const RenderContext& context) const {
+void Polyline::renderObject(const RenderContext& context) const {
     auto& out = context.out;
     out << "<polyline points=\""sv;
     bool firstPoint = true;
@@ -49,42 +49,42 @@ void Polyline::RenderObject(const RenderContext& context) const {
         firstPoint = false;
     }
     out << "\""sv;
-    RenderAttrs(context.out);
+    renderAttrs(context.out);
     out << "/>"sv;
 }
 
 // ---------- Text ------------------
 
-Text& Text::SetPosition(Point pos) {
+Text& Text::setPosition(Point pos) {
     position_ = pos;
     return *this;
 }
 
-Text& Text::SetOffset(Point offset) {
+Text& Text::setOffset(Point offset) {
     offset_ =  offset;
     return *this;
 }
 
-Text& Text::SetFontSize(uint32_t size) {
+Text& Text::setFontSize(uint32_t size) {
     fontSize_ = size;
     return *this;
 }
 
-Text& Text::SetFontFamily(std::string font_family) {
-    fontFamily_ = font_family;
+Text& Text::setFontFamily(std::string fontFamily) {
+    fontFamily_ = fontFamily;
     return *this;
 }
 
-Text& Text::SetFontWeight(std::string font_weight) {
-    fontWeight_ = font_weight;
+Text& Text::setFontWeight(std::string fontWeight) {
+    fontWeight_ = fontWeight;
     return *this;
 }
 
-Text& Text::SetData(std::string data) {
+Text& Text::setData(std::string data) {
     data_ = data;
     return *this;
 }
-void Text::RenderObject(const RenderContext& context) const {
+void Text::renderObject(const RenderContext& context) const {
     auto& out = context.out;
     out << "<text";
     out << " x=\""sv << position_.x << "\" y=\""sv << position_.y << "\""sv;
@@ -96,7 +96,7 @@ void Text::RenderObject(const RenderContext& context) const {
     if (fontWeight_.size() != 0 && fontWeight_ != "normal"sv) {
         out << " font-weight=\""sv << fontWeight_ << "\""sv;
     }
-    RenderAttrs(context.out);
+    renderAttrs(context.out);
     out << ">"sv;
     for (char c: data_) {
         switch (c) {
@@ -114,16 +114,16 @@ void Text::RenderObject(const RenderContext& context) const {
 
 // --------- Document -----------------
 
-void Document::AddPtr(std::unique_ptr<Object> &&obj) {
+void Document::addPtr(std::unique_ptr<Object> &&obj) {
     objects_.push_back(std::move(obj));
 }
 
-void Document::Render(std::ostream &out) const {
+void Document::render(std::ostream &out) const {
     out << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n"sv;
     out << "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\">\n"sv;
     RenderContext ctx(out, 2, 2);
     for (int i = 0; i < (int) objects_.size(); ++i) {
-        objects_.at(i)->Render(ctx);
+        objects_.at(i)->render(ctx);
         //out << "\n"sv;
     }
     out << "</svg>"sv;

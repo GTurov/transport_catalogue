@@ -8,7 +8,7 @@ namespace transport {
 Route::Route(const std::string_view name, const std::vector<Stop *>& stops, bool cycled)
     :name_(name), stops_(stops), isCycled_(cycled) {
     for (int i = 0; i < (int)stops.size()-1; ++i) {
-        directLength_ += ComputeDistance(stops[i]->place(),stops[i+1]->place());
+        directLength_ += computeDistance(stops[i]->place(),stops[i+1]->place());
     }
     if (!cycled) {
         directLength_ *= 2;

@@ -29,7 +29,7 @@ private:
 };
 
 template <typename C>
-auto AsRange(const C& container) {
+auto asRange(const C& container) {
     return Range{container.begin(), container.end()};
 }
 

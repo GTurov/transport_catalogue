@@ -27,33 +27,33 @@ std::ostream& operator<<(std::ostream& out, const TripItem& item) {
 }
 
 DistanceFinder::DistanceFinder(const Catalogue& catalogue, const Route* route)
-    : direct_distances_(route->stops().size()),
-      reverse_distances_(route->stops().size())
+    : directDistances_(route->stops().size()),
+      reverseDistances_(route->stops().size())
 {
     int directDistanceSum = 0;
     int reverseDistanceSum = 0;
-    direct_distances_[0] = directDistanceSum;
-    reverse_distances_[0] = reverseDistanceSum;
+    directDistances_[0] = directDistanceSum;
+    reverseDistances_[0] = reverseDistanceSum;
     for (int i = 1; i < (int)route->stops().size(); ++i) {
         directDistanceSum += catalogue.distanceBetween(route->stops()[i-1],route->stops()[i]);
-        direct_distances_[i] = directDistanceSum;
+        directDistances_[i] = directDistanceSum;
         reverseDistanceSum += catalogue.distanceBetween(route->stops()[i],route->stops()[i-1]);
-        reverse_distances_[i] = reverseDistanceSum;
+        reverseDistances_[i] = reverseDistanceSum;
     }
 }
 
 int DistanceFinder::distanceBetween(int fromStopIndex, int toStopIndex) {
     if (fromStopIndex < toStopIndex) {
-        return direct_distances_[toStopIndex] - direct_distances_[fromStopIndex];
+        return directDistances_[toStopIndex] - directDistances_[fromStopIndex];
     } else {
-        return -(reverse_distances_[toStopIndex] - reverse_distances_[fromStopIndex]);
+        return -(reverseDistances_[toStopIndex] - reverseDistances_[fromStopIndex]);
     }
 }
 
-RouteFinder::RouteFinder(const Catalogue& catalogue, int bus_wait_time , double bus_velocity)
+RouteFinder::RouteFinder(const Catalogue& catalogue, int busWaitTime , double busVelocity)
     : catalogue_(catalogue),
-      bus_wait_time_(bus_wait_time*60),
-      bus_velocity_(bus_velocity/3.6) {
+      busWaitTime_(busWaitTime*60),
+      busVelocity_(busVelocity/3.6) {
 
     // Все остановки будут вершинами графа. Добавим их в словарь для быстрого поиска вершины по названию.
     auto allStops = catalogue_.allStops();
@@ -73,9 +73,9 @@ RouteFinder::RouteFinder(const Catalogue& catalogue, int bus_wait_time , double 
         const auto& stops = route->stops();
         for (int i = 0; i+1 < (int)stops.size(); ++i) {
             for (int j = i+1; j < (int)stops.size(); ++j) {
-                addTripItem(stops[i], stops[j], route, {abs(i-j), static_cast<double>(bus_wait_time_), df.distanceBetween(i,j)/bus_velocity_});
+                addTripItem(stops[i], stops[j], route, {abs(i-j), static_cast<double>(busWaitTime_), df.distanceBetween(i,j)/busVelocity_});
                 if (!route->isCycled()) {
-                    addTripItem(stops[j], stops[i], route, {abs(i-j), static_cast<double>(bus_wait_time_), df.distanceBetween(j,i)/bus_velocity_});
+                    addTripItem(stops[j], stops[i], route, {abs(i-j), static_cast<double>(busWaitTime_), df.distanceBetween(j,i)/busVelocity_});
                 }
             }
         }
@@ -97,7 +97,7 @@ std::optional<std::vector<const TripItem *> > RouteFinder::findRoute(std::string
 
     graph::VertexId fromVertexId = stopToGraphVertex_.at(stopFrom.value());
     graph::VertexId toVertexId = stopToGraphVertex_.at(stopTo.value());
-    auto route = router_->BuildRoute(fromVertexId, toVertexId);
+    auto route = router_->buildRoute(fromVertexId, toVertexId);
     if (!route.has_value()) {
         return std::nullopt;
     }
@@ -110,7 +110,7 @@ std::optional<std::vector<const TripItem *> > RouteFinder::findRoute(std::string
 
 void RouteFinder::addTripItem(const Stop* from, const Stop* to, const Route* route, TripSpending &&spending) {
     TripItem item{from, to, route, spending};
-    int id = graph_->AddEdge(graph::Edge<GraphWeight>{stopToGraphVertex_[item.from],
+    int id = graph_->addEdge(graph::Edge<GraphWeight>{stopToGraphVertex_[item.from],
                                                       stopToGraphVertex_[item.to], item.spending});
     graphEdges_.push_back(std::move(item));
     if (id != (int)graphEdges_.size()-1) {

@@ -11,22 +11,22 @@
 #include <optional>
 #include <string>
 
-json::Node makeStopAnswer(int request_id, const transport::Stop::Info& data);
-json::Node makeRouteAnswer(int request_id, const transport::Route::Info& data);
-json::Node makePathAnswer(int request_id, const std::vector<transport::TripItem>& data);
+json::Node makeStopAnswer(int requestId, const transport::Stop::Info& data);
+json::Node makeRouteAnswer(int requestId, const transport::Route::Info& data);
+json::Node makePathAnswer(int requestId, const std::vector<transport::TripItem>& data);
 
 svg::Color nodeToColor(const json::Node& n);
 
 struct RoutingSettings {
-    int bus_wait_time;
-    double bus_velocity;
+    int busWaitTime;
+    double busVelocity;
 };
 
 enum class REQUEST_TYPE {
     STOP, BUS, MAP, ROUTE
 };
 
-struct request {
+struct Request {
     int id;
     REQUEST_TYPE type;
     std::string name;
@@ -42,7 +42,7 @@ public:
 
 private:
     transport::Catalogue& catalogue_;
-    renderSettings rs_;
-    RoutingSettings rrs_;
+    RenderSettings renderSettings_;
+    RoutingSettings routingSettings_;
 };
 

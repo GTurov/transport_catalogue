@@ -13,13 +13,13 @@ size_t detail::RouteNumberHasher::operator() (const std::string_view text) const
 
 size_t detail::StopNameHasher::operator() (const std::string_view text) const {
     int mult = 1;
-    auto hash_end = text.begin();
+    auto hashEnd = text.begin();
     if (text.size() > 4) {
-        std::advance(hash_end,4);
+        std::advance(hashEnd,4);
     } else {
-        hash_end = text.end();
+        hashEnd = text.end();
     }
-    size_t sum = std::accumulate(text.begin(), hash_end, int{0},[&mult](int sum, char c){mult *=100; return sum + (c-'A')*mult;});
+    size_t sum = std::accumulate(text.begin(), hashEnd, int{0},[&mult](int sum, char c){mult *=100; return sum + (c-'A')*mult;});
     return sum*text.size();
 }
 
@@ -60,18 +60,18 @@ void Catalogue::addStop(const std::string_view name, const geo::Coordinates &pla
 void Catalogue::addRoute(Route* route) {
     routes_.push_back(route);
     nameToBus_[route->name()] = route;
-    int length_ = 0;
+    int length = 0;
     for (int i = 0; i < (int)route->stops().size()-1; ++i) {
-        length_ += distanceBetween(route->stops()[i],route->stops()[i+1]);
+        length += distanceBetween(route->stops()[i],route->stops()[i+1]);
     }
     if (!route->isCycled()) {
-        length_ += distanceBetween(route->stops()[route->stops().size()-1],
+        length += distanceBetween(route->stops()[route->stops().size()-1],
                 route->stops()[route->stops().size()-1]);
         for (int i = (int)route->stops().size()-1; i > 0; --i) {
-            length_ += distanceBetween(route->stops()[i],route->stops()[i-1]);
+            length += distanceBetween(route->stops()[i],route->stops()[i-1]);
         }
     }
-    route->setLength(length_);
+    route->setLength(length);
     for (auto * stop: route->stops()) {
         stopToBuses_[stop].insert(route);
     }

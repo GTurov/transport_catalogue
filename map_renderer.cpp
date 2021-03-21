@@ -11,158 +11,158 @@
 std::string MapRenderer::render() const {
     using namespace std::literals;
 
-    const transport::RouteSet routes_to_draw = catalogue_.allRoutes();
-    transport::StopSet stops_to_draw;
-    for (transport::Route* r: routes_to_draw) {
+    const transport::RouteSet routesToDraw = catalogue_.allRoutes();
+    transport::StopSet stopsToDraw;
+    for (transport::Route* r: routesToDraw) {
         for (transport::Stop* s: r->stops()) {
-            stops_to_draw.insert(s);
+            stopsToDraw.insert(s);
         }
     }
 
-    MapScaler scaler(stops_to_draw.begin(), stops_to_draw.end(),
+    MapScaler scaler(stopsToDraw.begin(), stopsToDraw.end(),
                      settings_.width, settings_.height, settings_.padding);
 
-    svg::Document svg_document;
+    svg::Document svgDocument;
 
     // Lines
-    int color_index = 0;
-    for (transport::Route* r: routes_to_draw) {
+    int colorIndex = 0;
+    for (transport::Route* r: routesToDraw) {
         if (r->stopsCount() < 2) {
             continue;
         }
-        svg::Polyline route_line = svg::Polyline()
-                .SetStrokeColor(settings_.colorPalette[color_index])
-                .SetStrokeWidth(settings_.lineWidth)
-                .SetFillColor({})
-                .SetStrokeLineCap(svg::StrokeLineCap::ROUND)
-                .SetStrokeLineJoin(svg::StrokeLineJoin::ROUND)
+        svg::Polyline routeLine = svg::Polyline()
+                .setStrokeColor(settings_.colorPalette[colorIndex])
+                .setStrokeWidth(settings_.lineWidth)
+                .setFillColor({})
+                .setStrokeLineCap(svg::StrokeLineCap::ROUND)
+                .setStrokeLineJoin(svg::StrokeLineJoin::ROUND)
                 ;
-        ++color_index;
-        if (color_index == (int)settings_.colorPalette.size()) {
-            color_index = 0;
+        ++colorIndex;
+        if (colorIndex == (int)settings_.colorPalette.size()) {
+            colorIndex = 0;
         }
         for (auto it = r->stops().begin(); it != r->stops().end(); ++it) {
-            route_line.AddPoint(scaler((*it)->place()));
+            routeLine.addPoint(scaler((*it)->place()));
         }
         if (!r->isCycled()) {
-            for (auto r_it = ++r->stops().rbegin(); r_it != r->stops().rend(); ++r_it) {
-                route_line.AddPoint(scaler((*r_it)->place()));
+            for (auto rIt = ++r->stops().rbegin(); rIt != r->stops().rend(); ++rIt) {
+                routeLine.addPoint(scaler((*rIt)->place()));
             }
         }
-        svg_document.Add(route_line);
+        svgDocument.add(routeLine);
     }
 
     // Route labels
-    color_index = 0;
-    for (transport::Route* r: routes_to_draw) {
+    colorIndex = 0;
+    for (transport::Route* r: routesToDraw) {
         if (r->stopsCount() == 0) {
             continue;
         }
 
-        svg::Text route_label_underlayer = svg::Text()
-                .SetPosition(scaler((*r->stops().begin())->place()))
-                .SetOffset(settings_.busLabelOffset)
-                .SetFontSize(settings_.busLabelFontSize)
-                .SetFontFamily("Verdana")
-                .SetFontWeight("bold"s)
-                .SetData(r->name())
-                .SetFillColor(settings_.underlayerColor)
-                .SetStrokeColor(settings_.underlayerColor)
-                .SetStrokeWidth(settings_.underlayerWidth)
-                .SetStrokeLineCap(svg::StrokeLineCap::ROUND)
-                .SetStrokeLineJoin(svg::StrokeLineJoin::ROUND)
+        svg::Text routeLabelUnderlayer = svg::Text()
+                .setPosition(scaler((*r->stops().begin())->place()))
+                .setOffset(settings_.busLabelOffset)
+                .setFontSize(settings_.busLabelFontSize)
+                .setFontFamily("Verdana")
+                .setFontWeight("bold"s)
+                .setData(r->name())
+                .setFillColor(settings_.underlayerColor)
+                .setStrokeColor(settings_.underlayerColor)
+                .setStrokeWidth(settings_.underlayerWidth)
+                .setStrokeLineCap(svg::StrokeLineCap::ROUND)
+                .setStrokeLineJoin(svg::StrokeLineJoin::ROUND)
                 ;
-        svg_document.Add(route_label_underlayer);
+        svgDocument.add(routeLabelUnderlayer);
 
-        svg::Text route_label = svg::Text()
-                .SetPosition(scaler((*r->stops().begin())->place()))
-                .SetOffset(settings_.busLabelOffset)
-                .SetFontSize(settings_.busLabelFontSize)
-                .SetFontFamily("Verdana")
-                .SetFontWeight("bold"s)
-                .SetData(r->name())
-                .SetFillColor(settings_.colorPalette[color_index])
+        svg::Text routeLabel = svg::Text()
+                .setPosition(scaler((*r->stops().begin())->place()))
+                .setOffset(settings_.busLabelOffset)
+                .setFontSize(settings_.busLabelFontSize)
+                .setFontFamily("Verdana")
+                .setFontWeight("bold"s)
+                .setData(r->name())
+                .setFillColor(settings_.colorPalette[colorIndex])
                 ;
-        svg_document.Add(route_label);
+        svgDocument.add(routeLabel);
 
         if (!r->isCycled() && r->stops().size()>1 && (*r->stops().begin() != *r->stops().rbegin())) {
-            svg::Text stop_label_underlayer = svg::Text()
-                    .SetPosition(scaler((*r->stops().rbegin())->place()))
-                    .SetOffset(settings_.busLabelOffset)
-                    .SetFontSize(settings_.busLabelFontSize)
-                    .SetFontFamily("Verdana")
-                    .SetFontWeight("bold"s)
-                    .SetData(r->name())
-                    .SetFillColor(settings_.underlayerColor)
-                    .SetStrokeColor(settings_.underlayerColor)
-                    .SetStrokeWidth(settings_.underlayerWidth)
-                    .SetStrokeLineCap(svg::StrokeLineCap::ROUND)
-                    .SetStrokeLineJoin(svg::StrokeLineJoin::ROUND)
+            svg::Text stopLabelUnderlayer = svg::Text()
+                    .setPosition(scaler((*r->stops().rbegin())->place()))
+                    .setOffset(settings_.busLabelOffset)
+                    .setFontSize(settings_.busLabelFontSize)
+                    .setFontFamily("Verdana")
+                    .setFontWeight("bold"s)
+                    .setData(r->name())
+                    .setFillColor(settings_.underlayerColor)
+                    .setStrokeColor(settings_.underlayerColor)
+                    .setStrokeWidth(settings_.underlayerWidth)
+                    .setStrokeLineCap(svg::StrokeLineCap::ROUND)
+                    .setStrokeLineJoin(svg::StrokeLineJoin::ROUND)
                     ;
-            svg_document.Add(stop_label_underlayer);
+            svgDocument.add(stopLabelUnderlayer);
 
-            svg::Text stop_label = svg::Text()
-                    .SetPosition(scaler((*r->stops().rbegin())->place()))
-                    .SetOffset(settings_.busLabelOffset)
-                    .SetFontSize(settings_.busLabelFontSize)
-                    .SetFontFamily("Verdana")
-                    .SetFontWeight("bold"s)
-                    .SetData(r->name())
-                    .SetFillColor(settings_.colorPalette[color_index])
+            svg::Text stopLabel = svg::Text()
+                    .setPosition(scaler((*r->stops().rbegin())->place()))
+                    .setOffset(settings_.busLabelOffset)
+                    .setFontSize(settings_.busLabelFontSize)
+                    .setFontFamily("Verdana")
+                    .setFontWeight("bold"s)
+                    .setData(r->name())
+                    .setFillColor(settings_.colorPalette[colorIndex])
                     ;
-            svg_document.Add(stop_label);
+            svgDocument.add(stopLabel);
         }
-        ++color_index;
-        if (color_index == (int)settings_.colorPalette.size()) {
-            color_index = 0;
+        ++colorIndex;
+        if (colorIndex == (int)settings_.colorPalette.size()) {
+            colorIndex = 0;
         }
     }
 
     // Stop rounds
-    for (transport::Stop* s: stops_to_draw) {
-        svg::Circle stop_round = svg::Circle()
-                .SetCenter(scaler(s->place()))
-                .SetRadius(settings_.stopRadius)
-                .SetFillColor("white"s)
+    for (transport::Stop* s: stopsToDraw) {
+        svg::Circle stopRound = svg::Circle()
+                .setCenter(scaler(s->place()))
+                .setRadius(settings_.stopRadius)
+                .setFillColor("white"s)
                 ;
-        svg_document.Add(stop_round);
+        svgDocument.add(stopRound);
     }
 
     //Stop labels
-    for (transport::Stop* s: stops_to_draw) {
-        svg::Text stop_label_underlayer = svg::Text()
-                .SetPosition(scaler(s->place()))
-                .SetOffset(settings_.stopLabelOffset)
-                .SetFontSize(settings_.stopLabelFontSize)
-                .SetFontFamily("Verdana")
-                .SetData(s->name())
-                .SetFillColor(settings_.underlayerColor)
-                .SetStrokeColor(settings_.underlayerColor)
-                .SetStrokeWidth(settings_.underlayerWidth)
-                .SetStrokeLineCap(svg::StrokeLineCap::ROUND)
-                .SetStrokeLineJoin(svg::StrokeLineJoin::ROUND)
+    for (transport::Stop* s: stopsToDraw) {
+        svg::Text stopLabelUnderlayer = svg::Text()
+                .setPosition(scaler(s->place()))
+                .setOffset(settings_.stopLabelOffset)
+                .setFontSize(settings_.stopLabelFontSize)
+                .setFontFamily("Verdana")
+                .setData(s->name())
+                .setFillColor(settings_.underlayerColor)
+                .setStrokeColor(settings_.underlayerColor)
+                .setStrokeWidth(settings_.underlayerWidth)
+                .setStrokeLineCap(svg::StrokeLineCap::ROUND)
+                .setStrokeLineJoin(svg::StrokeLineJoin::ROUND)
                 ;
-        svg_document.Add(stop_label_underlayer);
+        svgDocument.add(stopLabelUnderlayer);
 
-        svg::Text stop_label = svg::Text()
-                .SetPosition(scaler(s->place()))
-                .SetOffset(settings_.stopLabelOffset)
-                .SetFontSize(settings_.stopLabelFontSize)
-                .SetFontFamily("Verdana")
-                .SetData(s->name())
-                .SetFillColor("black")
+        svg::Text stopLabel = svg::Text()
+                .setPosition(scaler(s->place()))
+                .setOffset(settings_.stopLabelOffset)
+                .setFontSize(settings_.stopLabelFontSize)
+                .setFontFamily("Verdana")
+                .setData(s->name())
+                .setFillColor("black")
                 ;
-        svg_document.Add(stop_label);
+        svgDocument.add(stopLabel);
     }
 
 #ifdef SVG_TO_FILE
-    std::ofstream svg_file("map.svg"s);
-    svg_document.Render(svg_file);
-    svg_file.close();
+    std::ofstream svgFile("map.svg"s);
+    svgDocument.Render(svgFile);
+    svgFile.close();
 #endif
     std::string buffer;
     std::stringstream ss(buffer);
-    svg_document.Render(ss);
+    svgDocument.render(ss);
 
     return ss.str();
 }

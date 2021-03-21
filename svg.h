@@ -31,16 +31,16 @@ struct RenderContext {
     RenderContext(std::ostream& out)
         : out(out) {}
 
-    RenderContext(std::ostream& out, int indent_step, int indent = 0)
+    RenderContext(std::ostream& out, int indentStep, int indent = 0)
         : out(out)
-        , indentStep(indent_step)
+        , indentStep(indentStep)
         , indent(indent) {}
 
-    RenderContext Indented() const {
+    RenderContext indented() const {
         return {out, indentStep, indent + indentStep};
     }
 
-    void RenderIndent() const {
+    void renderIndent() const {
         for (int i = 0; i < indent; ++i) {
             out.put(' ');
         }
@@ -58,29 +58,29 @@ struct RenderContext {
  */
 class Object {
 public:
-    void Render(const RenderContext& context) const;
+    void render(const RenderContext& context) const;
 
     virtual ~Object() = default;
 
 private:
-    virtual void RenderObject(const RenderContext& context) const = 0;
+    virtual void renderObject(const RenderContext& context) const = 0;
 };
 
 class ObjectContainer {
 public:
     template <typename Obj>
-    void Add(Obj obj) {
-        AddPtr(std::make_unique<Obj>(std::move(obj)));
+    void add(Obj obj) {
+        addPtr(std::make_unique<Obj>(std::move(obj)));
     }
 
-    virtual void AddPtr(std::unique_ptr<Object>&& obj) = 0;
+    virtual void addPtr(std::unique_ptr<Object>&& obj) = 0;
 
     virtual ~ObjectContainer() = default;
 };
 
 class Drawable {
 public:
-    virtual void Draw(ObjectContainer& container) const = 0;
+    virtual void draw(ObjectContainer& container) const = 0;
 
     virtual ~Drawable() = default;
 };
@@ -89,10 +89,10 @@ class Document: public ObjectContainer {
 public:
 
     // Добавляет в svg-документ объект-наследник svg::Object
-    void AddPtr(std::unique_ptr<Object>&& obj) override;
+    void addPtr(std::unique_ptr<Object>&& obj) override;
 
     // Выводит в ostream svg-представление документа
-    void Render(std::ostream& out) const;
+    void render(std::ostream& out) const;
 
     // Прочие методы и данные, необходимые для реализации класса Document
 
@@ -173,15 +173,15 @@ inline std::ostream& operator<<(std::ostream& out, Color color) {
 
 namespace detail {
 
-inline uint8_t Lerp(uint8_t from, uint8_t to, double t) {
+inline uint8_t lerp(uint8_t from, uint8_t to, double t) {
     return static_cast<uint8_t>(std::round((to - from) * t + from));
 }
 
 } // detail
 
-inline svg::Rgb Lerp(svg::Rgb from, svg::Rgb to, double t) {
+inline svg::Rgb lerp(svg::Rgb from, svg::Rgb to, double t) {
     using namespace detail;
-    return {Lerp(from.red, to.red, t), Lerp(from.green, to.green, t), Lerp(from.blue, to.blue, t)};
+    return {lerp(from.red, to.red, t), lerp(from.green, to.green, t), lerp(from.blue, to.blue, t)};
 }
 
 
@@ -226,31 +226,31 @@ inline std::ostream& operator<< (std::ostream& out, const StrokeLineJoin join) {
 template <typename Owner>
 class PathProps {
 public:
-    Owner& SetFillColor(Color color) {
+    Owner& setFillColor(Color color) {
         fillColor_ = std::move(color);
-        return AsOwner();
+        return asOwner();
     }
-    Owner& SetStrokeColor(Color color) {
+    Owner& setStrokeColor(Color color) {
         strokeColor_ = std::move(color);
-        return AsOwner();
+        return asOwner();
     }
-    Owner& SetStrokeWidth(double width) {
+    Owner& setStrokeWidth(double width) {
         strokeWidth_ = width;
-        return AsOwner();
+        return asOwner();
     }
-    Owner& SetStrokeLineCap(StrokeLineCap line_cap) {
+    Owner& setStrokeLineCap(StrokeLineCap line_cap) {
         strokeLineCap_ = line_cap;
-        return AsOwner();
+        return asOwner();
     }
-    Owner& SetStrokeLineJoin(StrokeLineJoin line_join) {
+    Owner& setStrokeLineJoin(StrokeLineJoin line_join) {
         strokeLineJoin_ = line_join;
-        return AsOwner();
+        return asOwner();
     }
 
 protected:
     ~PathProps() = default;
 
-    void RenderAttrs(std::ostream& out) const {
+    void renderAttrs(std::ostream& out) const {
         using namespace std::literals;
 
         if (fillColor_) {
@@ -271,7 +271,7 @@ protected:
     }
 
 private:
-    Owner& AsOwner() {
+    Owner& asOwner() {
         // static_cast безопасно преобразует *this к Owner&,
         // если класс Owner - наследник PathProps
         return static_cast<Owner&>(*this);
@@ -290,11 +290,11 @@ private:
  */
 class Circle : public Object, public PathProps<Circle> {
 public:
-    Circle& SetCenter(Point center);
-    Circle& SetRadius(double radius);
+    Circle& setCenter(Point center);
+    Circle& setRadius(double radius);
 
 private:
-    void RenderObject(const RenderContext& context) const override;
+    void renderObject(const RenderContext& context) const override;
 
     Point center_;
     double radius_ = 1.0;
@@ -307,10 +307,10 @@ private:
 class Polyline final: public Object, public PathProps<Polyline> {
 public:
     // Добавляет очередную вершину к ломаной линии
-    Polyline& AddPoint(Point p);
+    Polyline& addPoint(Point p);
 
 private:
-    void RenderObject(const RenderContext& context) const override;
+    void renderObject(const RenderContext& context) const override;
 
     std::vector<Point> points_;
 };
@@ -322,25 +322,25 @@ private:
 class Text final: public Object, public PathProps<Text> {
 public:
     // Задаёт координаты опорной точки (атрибуты x и y)
-    Text& SetPosition(Point pos);
+    Text& setPosition(Point pos);
 
     // Задаёт смещение относительно опорной точки (атрибуты dx, dy)
-    Text& SetOffset(Point offset);
+    Text& setOffset(Point offset);
 
     // Задаёт размеры шрифта (атрибут font-size)
-    Text& SetFontSize(uint32_t size);
+    Text& setFontSize(uint32_t size);
 
     // Задаёт название шрифта (атрибут font-family)
-    Text& SetFontFamily(std::string font_family);
+    Text& setFontFamily(std::string fontFamily);
 
     // Задаёт толщину шрифта (атрибут font-weight)
-    Text& SetFontWeight(std::string font_weight);
+    Text& setFontWeight(std::string fontWeight);
 
     // Задаёт текстовое содержимое объекта (отображается внутри тега text)
-    Text& SetData(std::string data);
+    Text& setData(std::string data);
 
 private:
-    void RenderObject(const RenderContext& context) const override;
+    void renderObject(const RenderContext& context) const override;
 
     Point position_ = {0,0};
     Point offset_ = {0,0};

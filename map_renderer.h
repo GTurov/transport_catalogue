@@ -9,7 +9,7 @@
 #include "svg.h"
 #include "transport_catalogue.h"
 
-struct renderSettings {
+struct RenderSettings {
     double width = 0;
     double height = 0;
 
@@ -36,45 +36,45 @@ class MapScaler {
     // и не упал в бескрайний океан, что привело бы к переполнению координат конечной остановки и неопределённому поведению. )))
 public:
     template <typename StopIt>
-    MapScaler(StopIt points_begin, StopIt points_end, double max_width,
-        double max_height, double padding)
+    MapScaler(StopIt pointsBegin, StopIt pointsEnd, double maxWidth,
+        double maxHeight, double padding)
         : padding_(padding) {
-        if (points_begin == points_end) {
+        if (pointsBegin == pointsEnd) {
             return;
         }
 
-        const auto [left_it, right_it]
-            = std::minmax_element(points_begin, points_end, [](auto lhs, auto rhs) {
+        const auto [leftIt, rightIt]
+            = std::minmax_element(pointsBegin, pointsEnd, [](auto lhs, auto rhs) {
             return lhs->place().lng < rhs->place().lng;
                 });
-        minLon_ = (*left_it)->place().lng;
-        const double max_lon = (*right_it)->place().lng;
+        minLon_ = (*leftIt)->place().lng;
+        const double maxLon = (*rightIt)->place().lng;
 
-        const auto [bottom_it, top_it]
-            = std::minmax_element(points_begin, points_end, [](auto lhs, auto rhs) {
+        const auto [bottomIt, topIt]
+            = std::minmax_element(pointsBegin, pointsEnd, [](auto lhs, auto rhs) {
             return lhs->place().lat < rhs->place().lat;
                 });
-        const double min_lat = (*bottom_it)->place().lat;
-        maxLat_ = (*top_it)->place().lat;
+        const double minLat = (*bottomIt)->place().lat;
+        maxLat_ = (*topIt)->place().lat;
 
-        std::optional<double> width_zoom;
-        if (!this->isZero(max_lon - minLon_)) {
-            width_zoom = (max_width - 2 * padding) / (max_lon - minLon_);
-        }
-
-        std::optional<double> height_zoom;
-        if (!this->isZero(maxLat_ - min_lat)) {
-            height_zoom = (max_height - 2 * padding) / (maxLat_ - min_lat);
+        std::optional<double> widthZoom;
+        if (!this->isZero(maxLon - minLon_)) {
+            widthZoom = (maxWidth - 2 * padding) / (maxLon - minLon_);
         }
 
-        if (width_zoom && height_zoom) {
-            zoomCoeff_ = std::min(width_zoom.value(), height_zoom.value());
+        std::optional<double> heightZoom;
+        if (!this->isZero(maxLat_ - minLat)) {
+            heightZoom = (maxHeight - 2 * padding) / (maxLat_ - minLat);
         }
-        else if (width_zoom) {
-            zoomCoeff_ = width_zoom.value();
+
+        if (widthZoom && heightZoom) {
+            zoomCoeff_ = std::min(widthZoom.value(), heightZoom.value());
         }
-        else if (height_zoom) {
-            zoomCoeff_ = height_zoom.value();
+        else if (widthZoom) {
+            zoomCoeff_ = widthZoom.value();
+        }
+        else if (heightZoom) {
+            zoomCoeff_ = heightZoom.value();
         }
     }
 
@@ -95,11 +95,11 @@ private:
 
 class MapRenderer {
 public:
-    MapRenderer(transport::Catalogue& catalogue, const renderSettings& settings)
+    MapRenderer(transport::Catalogue& catalogue, const RenderSettings& settings)
         :catalogue_(catalogue), settings_(settings) {}
     std::string render() const;
 private:
     const transport::Catalogue& catalogue_;
-    const renderSettings& settings_;
+    const RenderSettings& settings_;
 };
 

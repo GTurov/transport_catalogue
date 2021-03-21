@@ -34,26 +34,26 @@ public:
     Node(Array array);
     Node(Dict map);
 
-    bool AsBool() const;
-    int AsInt() const;
-    double AsDouble() const;
-    const std::string& AsString() const;
-    const Array& AsArray() const;
-    const Dict& AsDict() const;
+    bool asBool() const;
+    int asInt() const;
+    double asDouble() const;
+    const std::string& asString() const;
+    const Array& asArray() const;
+    const Dict& asDict() const;
 
-    bool IsNull() const;
-    bool IsBool() const;
-    bool IsInt() const;
-    bool IsDouble() const;
-    bool IsPureDouble() const;
-    bool IsString() const;
-    bool IsArray() const;
-    bool IsDict() const;
+    bool isNull() const;
+    bool isBool() const;
+    bool isInt() const;
+    bool isDouble() const;
+    bool isPureDouble() const;
+    bool isString() const;
+    bool isArray() const;
+    bool isDict() const;
 
     bool operator==(const Node& other) const;
     bool operator!=(const Node& other) const;
 
-    Data Content() const;
+    Data content() const;
 
 private:
     Data data_;
@@ -65,7 +65,7 @@ class Document {
 public:
     explicit Document(Node root);
 
-    const Node& GetRoot() const;
+    const Node& getRoot() const;
 
     bool operator==(const Document& other) const {
         return root_ == other.root_;
@@ -78,8 +78,8 @@ private:
     Node root_;
 };
 
-Document Load(std::istream& input);
+Document load(std::istream& input);
 
-void Print(const Document& doc, std::ostream& output);
+void print(const Document& doc, std::ostream& output);
 
 }  // namespace json

@@ -14,7 +14,7 @@ namespace json {
 
 namespace detail {
 
-Node ValueToNode(const Data &value);
+Node valueToNode(const Data &value);
 
 } //namespace detail
 
@@ -25,18 +25,18 @@ class ArrayItemContext;
 class Builder {
 public:
     Builder() {}
-    ~Builder() {Clear();}
-    DictValueContext Key(const std::string& key);
-    Builder& Value(const Data& value);
-    DictItemContext StartDict();
-    Builder& EndDict();
-    ArrayItemContext StartArray();
-    Builder& EndArray();
-    Node Build();
-    void Clear();
+    ~Builder() {clear();}
+    DictValueContext key(const std::string& key);
+    Builder& value(const Data& value);
+    DictItemContext startDict();
+    Builder& endDict();
+    ArrayItemContext startArray();
+    Builder& endArray();
+    Node build();
+    void clear();
 
 private:
-    bool IsDictKeyTop() {return (nodesStack_.size()>1) && nodesStack_.top()->IsString();}
+    bool isDictKeyTop() {return (nodesStack_.size()>1) && nodesStack_.top()->isString();}
 private:
     enum class state {EMPTY, EDITION, READY};
     state state_ = state::EMPTY;
@@ -47,10 +47,10 @@ class ArrayItemContext {
 public:
     ArrayItemContext(Builder& b)
         :b_(b){}
-    ArrayItemContext Value(const Data& value) {return ArrayItemContext(b_.Value(value));}
-    DictItemContext StartDict();
-    ArrayItemContext StartArray() {return b_.StartArray();}
-    Builder& EndArray() {return b_.EndArray();}
+    ArrayItemContext value(const Data& value) {return ArrayItemContext(b_.value(value));}
+    DictItemContext startDict();
+    ArrayItemContext startArray() {return b_.startArray();}
+    Builder& endArray() {return b_.endArray();}
 private:
     Builder& b_;
 };
@@ -59,8 +59,8 @@ class DictItemContext {
 public:
     DictItemContext(Builder& b)
         :b_(b){}
-    DictValueContext Key(const std::string& key);
-    Builder& EndDict() {return b_.EndDict();}
+    DictValueContext key(const std::string& key);
+    Builder& endDict() {return b_.endDict();}
 private:
     Builder& b_;
 };
@@ -69,9 +69,9 @@ class DictValueContext {
 public:
     DictValueContext(Builder& b)
         :b_(b){}
-    DictItemContext Value(const Data& value) {return DictItemContext(b_.Value(value));}
-    DictItemContext StartDict() {return b_.StartDict();}
-    ArrayItemContext StartArray() {return b_.StartArray();}
+    DictItemContext value(const Data& value) {return DictItemContext(b_.value(value));}
+    DictItemContext startDict() {return b_.startDict();}
+    ArrayItemContext startArray() {return b_.startArray();}
 private:
     Builder& b_;
 };
