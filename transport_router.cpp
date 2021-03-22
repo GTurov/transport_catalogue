@@ -83,7 +83,7 @@ RouteFinder::RouteFinder(const Catalogue& catalogue, int busWaitTime , double bu
     router_ = std::make_unique<graph::Router<GraphWeight>>(*graph_);
 }
 
-std::optional<std::vector<const TripItem *> > RouteFinder::findRoute(std::string_view from, std::string_view to) {
+std::optional<std::vector<const TripItem *> > RouteFinder::findRoute(std::string_view from, std::string_view to) const {
     auto stopFrom = catalogue_.stop(from);
     auto stopTo = catalogue_.stop(to);
     if (!stopFrom.has_value() || !stopTo.has_value()) {

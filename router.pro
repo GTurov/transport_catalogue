@@ -10,7 +10,6 @@ SOURCES += \
         json_reader.cpp \
         main.cpp \
         map_renderer.cpp \
-        request_handler.cpp \
         svg.cpp \
         transport_catalogue.cpp \
         transport_router.cpp
@@ -24,7 +23,6 @@ HEADERS += \
     json_reader.h \
     map_renderer.h \
     ranges.h \
-    request_handler.h \
     router.h \
     svg.h \
     transport_catalogue.h \

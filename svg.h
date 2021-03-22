@@ -72,7 +72,6 @@ public:
     void add(Obj obj) {
         addPtr(std::make_unique<Obj>(std::move(obj)));
     }
-
     virtual void addPtr(std::unique_ptr<Object>&& obj) = 0;
 
     virtual ~ObjectContainer() = default;
@@ -90,7 +89,11 @@ public:
 
     // Добавляет в svg-документ объект-наследник svg::Object
     void addPtr(std::unique_ptr<Object>&& obj) override;
-
+    void combine(Document other) {
+        for (auto& object: other.objects_) {
+            objects_.push_back(std::move(object));
+        }
+    }
     // Выводит в ostream svg-представление документа
     void render(std::ostream& out) const;
 

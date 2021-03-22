@@ -49,7 +49,7 @@ class RouteFinder {
     using NavigationGraph = graph::DirectedWeightedGraph<GraphWeight>;
 public:
     RouteFinder(const Catalogue& catalogue, int busWaitTime , double busVelocity);
-    std::optional<std::vector<const TripItem*>> findRoute(std::string_view from, std::string_view to);
+    std::optional<std::vector<const TripItem*>> findRoute(std::string_view from, std::string_view to) const;
 
 private:
     void addTripItem(const Stop* from, const Stop* to, const Route* route, TripSpending&& spending);

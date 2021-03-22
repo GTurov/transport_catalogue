@@ -1,12 +1,10 @@
 #include "json_reader.h"
-#include "transport_catalogue.h"
 
 using namespace transport;
 
 int main()
 {
-    Catalogue catalogue;
-    JsonReader jReader(catalogue);
+    JsonReader jReader;
     jReader.processQueries();
     return 0;
 }
