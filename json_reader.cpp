@@ -50,7 +50,7 @@ void JsonReader::processQueries(std::istream& in, std::ostream& out) {
         throw json::ParsingError("Base request parsing error"s);
     }
     transport::Catalogue catalogue;
-    this->fillDataBase(catalogue, stopNodes, busNodes);
+    fillDataBase(catalogue, stopNodes, busNodes);
 
     // Render settings
     RenderSettings renderSettings;
@@ -70,7 +70,7 @@ void JsonReader::processQueries(std::istream& in, std::ostream& out) {
     std::vector<Request> statRequests = parseStatRequests(rawRequests.getRoot().asDict().at("stat_requests"));
 
     // Answers
-    out << this->prepareAnswers(statRequests, catalogue, renderer, finder);
+    out << prepareAnswers(statRequests, catalogue, renderer, finder);
 }
 
 json::Node JsonReader::makeNotFoundAnswer(int requestId) {

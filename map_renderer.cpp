@@ -32,7 +32,7 @@ MapScaler::MapScaler(ForwardIt pointsBegin, ForwardIt pointsEnd, double maxWidth
 }
 
 svg::Point MapScaler::operator()(geo::Coordinates coords) const {
-    return {(coords.lng - minLon_) * zoomCoeff_ + padding_,
+    return { (coords.lng - minLon_) * zoomCoeff_ + padding_,
             (maxLat_ - coords.lat) * zoomCoeff_ + padding_ };
 }
 
